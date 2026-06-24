@@ -1,40 +1,14 @@
 function initAdminLogin() {
-    const form = document.getElementById('adminLoginForm');
-    const loginDiv = document.getElementById('adminLogin');
+    const promptDiv = document.getElementById('adminLoginPrompt');
     const panelDiv = document.getElementById('adminPanel');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('adminEmail').value.trim();
-        const pass = document.getElementById('adminPass').value;
-        const loginBtn = form.querySelector('button[type="submit"]');
-        setLoading(loginBtn, true);
-
-        if (USE_API) {
-            try {
-                const data = await apiLogin(email, pass);
-                apiToken = data.token;
-                localStorage.setItem('apiToken', apiToken);
-                await loadFromApi();
-            } catch (err) {
-                setLoading(loginBtn, false);
-                showToast(err.message, 'error', 'Login Gagal');
-                return;
-            }
-        } else if (pass !== 'admin123') {
-            showToast('Password salah! Coba lagi.', 'error');
-            setLoading(loginBtn, false);
-            form.reset();
-            return;
-        }
-
-        setLoading(loginBtn, false);
-        loginDiv.style.display = 'none';
+    if (apiToken) {
+        promptDiv.style.display = 'none';
         panelDiv.style.display = 'block';
-        renderAdminBookings();
-        renderAdminCars();
-        form.reset();
-    });
+    } else {
+        promptDiv.style.display = 'block';
+        panelDiv.style.display = 'none';
+    }
 
     document.getElementById('adminLogout').addEventListener('click', async () => {
         if (USE_API && apiToken) {
@@ -42,9 +16,8 @@ function initAdminLogin() {
             apiToken = '';
             localStorage.removeItem('apiToken');
         }
-        loginDiv.style.display = 'block';
+        promptDiv.style.display = 'block';
         panelDiv.style.display = 'none';
-        document.getElementById('adminPass').value = '';
     });
 }
 

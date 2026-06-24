@@ -24,7 +24,7 @@
                 <li><a href="#cars">Mobil</a></li>
                 <li><a href="#booking">Booking</a></li>
                 <li><a href="#contact">Kontak</a></li>
-                <li><a href="#admin" class="btn-admin-nav">Admin</a></li>
+                <li><a href="/login" class="btn-admin-nav">Admin</a></li>
             </ul>
         </div>
     </nav>
@@ -218,20 +218,17 @@
                 <p>Kelola data mobil dan booking</p>
             </div>
 
-            <div class="admin-login" id="adminLogin">
+            <div id="adminLoginPrompt" class="admin-login" style="display:none;">
                 <div class="admin-login-box">
                     <i class="fas fa-lock"></i>
-                    <h3>Login Admin</h3>
-                    <form id="adminLoginForm">
-                        <div class="form-group">
-                            <input type="email" id="adminEmail" value="admin@rentalmobil.com" placeholder="Email admin" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" id="adminPass" placeholder="Password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Login</button>
-                    </form>
-                    <small>Email: <strong>admin@rentalmobil.com</strong> | Password: <strong>admin123</strong></small>
+                    <h3>Login Diperlukan</h3>
+                    <p style="color:var(--text-light);margin-bottom:20px;">Silakan login terlebih dahulu untuk mengakses panel admin.</p>
+                    <a href="/login" class="btn btn-primary" style="text-decoration:none;">
+                        <i class="fas fa-sign-in-alt"></i> Login Admin
+                    </a>
+                    <small style="display:block;margin-top:16px;color:var(--text-light);">
+                        Belum punya akun? <a href="/register" style="color:var(--primary);font-weight:600;">Daftar di sini</a>
+                    </small>
                 </div>
             </div>
 
