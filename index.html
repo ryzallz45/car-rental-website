@@ -99,42 +99,42 @@
                     <form class="booking-form" id="bookingForm" novalidate>
                         <div class="form-group">
                             <label for="bookCar">Pilih Mobil</label>
-                            <select id="bookCar" name="car_id" required></select>
+                            <select id="bookCar" name="car_id" data-validate="required"></select>
                             <div class="form-error"></div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="bookName">Nama Lengkap</label>
-                                <input type="text" id="bookName" name="customer_name" placeholder="Masukkan nama Anda" required>
+                                <input type="text" id="bookName" name="customer_name" placeholder="Masukkan nama Anda" data-validate="required,minLength:3">
                                 <div class="form-error"></div>
                             </div>
                             <div class="form-group">
                                 <label for="bookPhone">No. Telepon</label>
-                                <input type="tel" id="bookPhone" name="phone" placeholder="08xxxxxxxxxx" required>
+                                <input type="tel" id="bookPhone" name="phone" placeholder="08xxxxxxxxxx" data-validate="required,phone">
                                 <div class="form-error"></div>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="bookEmail">Email</label>
-                                <input type="email" id="bookEmail" name="email" placeholder="email@example.com" required>
+                                <input type="email" id="bookEmail" name="email" placeholder="email@example.com" data-validate="required,email">
                                 <div class="form-error"></div>
                             </div>
                             <div class="form-group">
                                 <label for="bookAddress">Alamat</label>
-                                <input type="text" id="bookAddress" name="address" placeholder="Alamat lengkap" required>
+                                <input type="text" id="bookAddress" name="address" placeholder="Alamat lengkap" data-validate="required,minLength:5">
                                 <div class="form-error"></div>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="bookStart">Tanggal Mulai</label>
-                                <input type="date" id="bookStart" name="start_date" required>
+                                <input type="date" id="bookStart" name="start_date" data-validate="required">
                                 <div class="form-error"></div>
                             </div>
                             <div class="form-group">
                                 <label for="bookEnd">Tanggal Selesai</label>
-                                <input type="date" id="bookEnd" name="end_date" required>
+                                <input type="date" id="bookEnd" name="end_date" data-validate="required,dateAfter:bookStart">
                                 <div class="form-error"></div>
                             </div>
                         </div>
@@ -296,17 +296,18 @@
 
                     <div class="admin-tab-content" id="tab-add-car">
                         <h3>Tambah / Edit Mobil</h3>
-                        <form class="car-form" id="carForm" novalidate>
+                         <form class="car-form" id="carForm" novalidate>
                             <input type="hidden" id="carFormId">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="carName">Nama Mobil</label>
-                                    <input type="text" id="carName" name="name" required>
+                                    <input type="text" id="carName" name="name" data-validate="required,minLength:2">
                                     <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="carCategory">Kategori</label>
-                                    <select id="carCategory" name="category" required>
+                                    <select id="carCategory" name="category" data-validate="required">
+                                        <option value="">-- Pilih --</option>
                                         <option value="MPV">MPV</option>
                                         <option value="SUV">SUV</option>
                                         <option value="Sedan">Sedan</option>
@@ -319,24 +320,25 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="carPrice">Harga per Hari (Rp)</label>
-                                    <input type="number" id="carPrice" name="price" required>
+                                    <input type="number" id="carPrice" name="price" data-validate="required,positive">
                                     <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="carImage">URL Gambar</label>
-                                    <input type="url" id="carImage" name="image" placeholder="https://..." required>
+                                    <input type="url" id="carImage" name="image" placeholder="https://..." data-validate="required,url">
                                     <div class="form-error"></div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="carSeats">Jumlah Kursi</label>
-                                    <input type="number" id="carSeats" name="seats" required>
+                                    <input type="number" id="carSeats" name="seats" data-validate="required,min:1">
                                     <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="carTransmission">Transmisi</label>
-                                    <select id="carTransmission" name="transmission" required>
+                                    <select id="carTransmission" name="transmission" data-validate="required">
+                                        <option value="">-- Pilih --</option>
                                         <option value="Manual">Manual</option>
                                         <option value="Automatic">Matic</option>
                                     </select>
