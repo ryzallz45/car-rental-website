@@ -1,4 +1,6 @@
-const API_BASE = localStorage.getItem('apiBase') || '';
+const isLaravelServer = window.location.protocol !== 'file:';
+const storedBase = localStorage.getItem('apiBase');
+const API_BASE = storedBase || (isLaravelServer ? window.location.origin : '');
 const USE_API = !!API_BASE;
 let apiToken = localStorage.getItem('apiToken') || '';
 
@@ -73,9 +75,12 @@ function initApiConfig() {
     const statusEl = document.createElement('p');
     statusEl.style.cssText = 'margin-top:12px;font-size:0.9rem;';
     if (USE_API) {
+        const mode = isLaravelServer ? 'Laravel Built-in Server' : 'External Server';
         statusEl.innerHTML = apiToken
-            ? '<span style="color:var(--success);">Terhubung ke API &#10003;</span>'
-            : '<span style="color:var(--warning);">Mode API aktif, tapi belum login ke admin</span>';
+            ? `<span style="color:var(--success);">Terhubung ke API (${mode}) &#10003;</span>`
+            : `<span style="color:var(--warning);">Mode API aktif (${mode}), tapi belum login ke admin</span>`;
+    } else {
+        statusEl.innerHTML = '<span style="color:var(--text-light);">Mode localStorage (offline)</span>';
     }
     form.after(statusEl);
 

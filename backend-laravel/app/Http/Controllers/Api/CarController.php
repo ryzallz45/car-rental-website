@@ -12,7 +12,7 @@ class CarController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $perPage = $request->integer('per_page', 12);
+        $perPage = $request->integer('per_page', 100);
         $cars = Car::paginate($perPage);
         return response()->json($cars);
     }

@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rental Mobil - Sewa Mobil Terpercaya</title>
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="{{ asset('css/reset.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -485,13 +485,13 @@ php artisan serve</pre>
     </a>
 
     <div class="toast-container" id="toastContainer"></div>
-    <script src="js/utils.js"></script>
-    <script src="js/validators.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/store.js"></script>
-    <script src="js/components/cars.js"></script>
-    <script src="js/components/booking.js"></script>
-    <script src="js/components/admin.js"></script>
-    <script src="js/app.js"></script>
+    <script src="{{ asset('js/utils.js') }}"></script>
+    <script src="{{ asset('js/validators.js') }}"></script>
+    <script src="{{ asset('js/api.js') }}"></script>
+    <script src="{{ asset('js/store.js') }}"></script>
+    <script src="{{ asset('js/components/cars.js') }}"></script>
+    <script src="{{ asset('js/components/booking.js') }}"></script>
+    <script src="{{ asset('js/components/admin.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
