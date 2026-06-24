@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Mobil - Sewa Mobil Terpercaya</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="nav-brand">
+                <i class="fas fa-car"></i> Rental Mobil
+            </a>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="active">Beranda</a></li>
+                <li><a href="#cars">Mobil</a></li>
+                <li><a href="#booking">Booking</a></li>
+                <li><a href="#contact">Kontak</a></li>
+                <li><a href="#admin" class="btn-admin-nav">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <h1>Sewa Mobil <span>Mudah & Cepat</span></h1>
+            <p>Nikmati perjalanan Anda dengan layanan rental mobil terpercaya. Harga bersaing, mobil berkualitas, dan pelayanan terbaik.</p>
+            <div class="hero-buttons">
+                <a href="#cars" class="btn btn-primary">Lihat Mobil <i class="fas fa-arrow-right"></i></a>
+                <a href="#booking" class="btn btn-outline">Booking Sekarang</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number" data-target="50">0</span>
+                    <span class="stat-label">Mobil</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" data-target="500">0</span>
+                    <span class="stat-label">Pelanggan</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" data-target="5">0</span>
+                    <span class="stat-label">Tahun</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cars" class="section cars-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Daftar Mobil</h2>
+                <p>Pilih mobil yang sesuai dengan kebutuhan Anda</p>
+            </div>
+            <div class="car-filters">
+                <div class="filter-group">
+                    <select id="filterCategory">
+                        <option value="all">Semua Kategori</option>
+                        <option value="MPV">MPV</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="Luxury">Luxury</option>
+                    </select>
+                    <select id="filterTransmission">
+                        <option value="all">Semua Transmisi</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Automatic">Matic</option>
+                    </select>
+                    <select id="filterSort">
+                        <option value="default">Urutkan</option>
+                        <option value="price-asc">Harga Terendah</option>
+                        <option value="price-desc">Harga Tertinggi</option>
+                        <option value="name">Nama A-Z</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cars-grid" id="carsGrid"></div>
+        </div>
+    </section>
+
+    <section id="booking" class="section booking-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Booking Mobil</h2>
+                <p>Isi form di bawah untuk menyewa mobil</p>
+            </div>
+            <div class="booking-wrapper" id="bookingWrapper">
+                <div class="booking-info">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Silakan pilih mobil terlebih dahulu dari halaman <a href="#cars">Daftar Mobil</a> atau pilih langsung di form.</p>
+                </div>
+                <form class="booking-form" id="bookingForm">
+                    <div class="form-group">
+                        <label for="bookCar">Pilih Mobil</label>
+                        <select id="bookCar" required></select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookName">Nama Lengkap</label>
+                            <input type="text" id="bookName" placeholder="Masukkan nama Anda" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookPhone">No. Telepon</label>
+                            <input type="tel" id="bookPhone" placeholder="08xxxxxxxxxx" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookEmail">Email</label>
+                            <input type="email" id="bookEmail" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookAddress">Alamat</label>
+                            <input type="text" id="bookAddress" placeholder="Alamat lengkap" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookStart">Tanggal Mulai</label>
+                            <input type="date" id="bookStart" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookEnd">Tanggal Selesai</label>
+                            <input type="date" id="bookEnd" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookNotes">Catatan Tambahan</label>
+                        <textarea id="bookNotes" placeholder="Catatan (opsional)"></textarea>
+                    </div>
+                    <div class="booking-total" id="bookingTotal">
+                        <span>Total: </span>
+                        <strong>Rp 0</strong>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-check"></i> Booking Sekarang
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Kontak Kami</h2>
+                <p>Hubungi kami untuk informasi lebih lanjut</p>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Alamat</h4>
+                            <p>Jl. Merdeka No. 123, Jakarta Pusat</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Telepon</h4>
+                            <p>+62 812-3456-7890</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>info@rentalmobil.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h4>Jam Operasional</h4>
+                            <p>Senin - Sabtu: 08:00 - 20:00</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <input type="text" placeholder="Nama Anda" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Email Anda" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Pesan Anda" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kirim Pesan</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="admin" class="section admin-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Panel Admin</h2>
+                <p>Kelola data mobil dan booking</p>
+            </div>
+
+            <div class="admin-login" id="adminLogin">
+                <div class="admin-login-box">
+                    <i class="fas fa-lock"></i>
+                    <h3>Login Admin</h3>
+                    <form id="adminLoginForm">
+                        <div class="form-group">
+                            <input type="password" id="adminPass" placeholder="Masukkan password admin" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    </form>
+                    <small>Password default: <strong>admin123</strong></small>
+                </div>
+            </div>
+
+            <div class="admin-panel" id="adminPanel" style="display:none;">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="bookings">
+                        <i class="fas fa-calendar-check"></i> Booking
+                    </button>
+                    <button class="admin-tab" data-tab="cars-manage">
+                        <i class="fas fa-car"></i> Kelola Mobil
+                    </button>
+                    <button class="admin-tab" data-tab="add-car">
+                        <i class="fas fa-plus-circle"></i> Tambah Mobil
+                    </button>
+                    <button class="admin-tab btn-logout" id="adminLogout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+
+                <div class="admin-content">
+                    <div class="admin-tab-content active" id="tab-bookings">
+                        <h3>Daftar Booking</h3>
+                        <div class="table-wrapper">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Mobil</th>
+                                        <th>Penyewa</th>
+                                        <th>Telepon</th>
+                                        <th>Tanggal</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookingsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="admin-tab-content" id="tab-cars-manage">
+                        <h3>Daftar Mobil</h3>
+                        <div class="table-wrapper">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nama</th>
+                                        <th>Kategori</th>
+                                        <th>Harga/Hari</th>
+                                        <th>Transmisi</th>
+                                        <th>Kursi</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="carsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="admin-tab-content" id="tab-add-car">
+                        <h3>Tambah / Edit Mobil</h3>
+                        <form class="car-form" id="carForm">
+                            <input type="hidden" id="carFormId">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="carName">Nama Mobil</label>
+                                    <input type="text" id="carName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="carCategory">Kategori</label>
+                                    <select id="carCategory" required>
+                                        <option value="MPV">MPV</option>
+                                        <option value="SUV">SUV</option>
+                                        <option value="Sedan">Sedan</option>
+                                        <option value="Hatchback">Hatchback</option>
+                                        <option value="Luxury">Luxury</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="carPrice">Harga per Hari (Rp)</label>
+                                    <input type="number" id="carPrice" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="carImage">URL Gambar</label>
+                                    <input type="url" id="carImage" placeholder="https://..." required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="carSeats">Jumlah Kursi</label>
+                                    <input type="number" id="carSeats" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="carTransmission">Transmisi</label>
+                                    <select id="carTransmission" required>
+                                        <option value="Manual">Manual</option>
+                                        <option value="Automatic">Matic</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="carDescription">Deskripsi</label>
+                                <textarea id="carDescription" rows="3"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Simpan Mobil
+                                </button>
+                                <button type="button" class="btn btn-outline" id="carFormCancel" style="display:none;">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-car"></i> Rental Mobil
+                    <p>Solusi sewa mobil terpercaya untuk perjalanan Anda.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Menu</h4>
+                    <ul>
+                        <li><a href="#home">Beranda</a></li>
+                        <li><a href="#cars">Mobil</a></li>
+                        <li><a href="#booking">Booking</a></li>
+                        <li><a href="#contact">Kontak</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Kontak</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +62 812-3456-7890</li>
+                        <li><i class="fas fa-envelope"></i> info@rentalmobil.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jakarta Pusat</li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>Ikuti Kami</h4>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Rental Mobil. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body">
+                <i class="fas fa-check-circle modal-icon"></i>
+                <h3>Booking Berhasil!</h3>
+                <p>Terima kasih, <span id="modalCustomerName"></span>!</p>
+                <p>Booking mobil <strong id="modalCarName"></strong> Anda telah dikonfirmasi.</p>
+                <div class="modal-details" id="modalDetails"></div>
+                <p class="modal-note">Tim kami akan menghubungi Anda untuk detail lebih lanjut.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteModal">
+        <div class="modal-content modal-sm">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body">
+                <i class="fas fa-exclamation-triangle modal-icon" style="color:var(--danger);"></i>
+                <h3>Konfirmasi Hapus</h3>
+                <p id="deleteModalMessage">Apakah Anda yakin ingin menghapus data ini?</p>
+                <div class="modal-actions">
+                    <button class="btn btn-danger" id="confirmDelete">Hapus</button>
+                    <button class="btn btn-outline modal-close-btn">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="https://wa.me/6281234567890" class="wa-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
