@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Car;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,12 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@rentalmobil.com',
+            'password' => bcrypt('admin123'),
+        ]);
+
         Car::create([
             'name' => 'Toyota Avanza',
             'category' => 'MPV',

@@ -24,40 +24,73 @@ const STORAGE_KEYS = {
 let cars = [];
 let bookings = [];
 
+let apiToken = localStorage.getItem('apiToken') || '';
+
+function apiHeaders(extra = {}) {
+    const headers = { 'Content-Type': 'application/json', ...extra };
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    return headers;
+}
+
 async function apiGet(endpoint) {
-    const res = await fetch(`${API_BASE}/api${endpoint}`);
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const res = await fetch(`${API_BASE}/api${endpoint}`, { headers: apiHeaders() });
+    if (res.status === 204) return null;
+    if (!res.ok) {
+        const msg = await res.json().catch(() => ({}));
+        throw new Error(msg.message || `HTTP ${res.status}`);
+    }
     const json = await res.json();
     return json.data || json;
 }
 
 async function apiPost(endpoint, body) {
     const res = await fetch(`${API_BASE}/api${endpoint}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        method: 'POST', headers: apiHeaders(), body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    if (!res.ok) {
+        const msg = await res.json().catch(() => ({}));
+        throw new Error(msg.message || `HTTP ${res.status}`);
+    }
     return await res.json();
 }
 
 async function apiPut(endpoint, body) {
     const res = await fetch(`${API_BASE}/api${endpoint}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        method: 'PUT', headers: apiHeaders(), body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    if (!res.ok) {
+        const msg = await res.json().catch(() => ({}));
+        throw new Error(msg.message || `HTTP ${res.status}`);
+    }
     return await res.json();
 }
 
 async function apiDelete(endpoint) {
-    const res = await fetch(`${API_BASE}/api${endpoint}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const res = await fetch(`${API_BASE}/api${endpoint}`, {
+        method: 'DELETE', headers: apiHeaders(),
+    });
+    if (!res.ok) {
+        const msg = await res.json().catch(() => ({}));
+        throw new Error(msg.message || `HTTP ${res.status}`);
+    }
+}
+
+async function apiLogin(email, password) {
+    const res = await fetch(`${API_BASE}/api/login`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Login gagal');
+    return json.data;
 }
 
 async function loadFromApi() {
     try {
         cars = await apiGet('/cars');
-        bookings = await apiGet('/bookings');
+        if (apiToken) {
+            bookings = await apiGet('/bookings').catch(() => []);
+        }
         return true;
     } catch {
         return false;
@@ -356,16 +389,15 @@ function initBookingForm() {
         if (USE_API) {
             try {
                 await apiPost('/bookings', {
-                    carId: car.id,
-                    carName: car.name,
-                    customerName: name,
+                    car_id: car.id,
+                    customer_name: name,
                     phone,
                     email,
                     address,
-                    startDate: start,
-                    endDate: end,
+                    start_date: start,
+                    end_date: end,
                     days: diffDays,
-                    totalPrice: total,
+                    total_price: total,
                     status: 'confirmed',
                     notes,
                 });
@@ -423,26 +455,41 @@ function initAdminLogin() {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const email = document.getElementById('adminEmail').value.trim();
         const pass = document.getElementById('adminPass').value;
 
-        if (pass === 'admin123') {
-            loginDiv.style.display = 'none';
-            panelDiv.style.display = 'block';
-            if (USE_API) {
+        if (USE_API) {
+            try {
+                const data = await apiLogin(email, pass);
+                apiToken = data.token;
+                localStorage.setItem('apiToken', apiToken);
                 await loadFromApi();
+            } catch (err) {
+                alert('Login gagal: ' + err.message);
+                return;
             }
-            renderAdminBookings();
-            renderAdminCars();
-        } else {
+        } else if (pass !== 'admin123') {
             alert('Password salah! Coba lagi.');
+            form.reset();
+            return;
         }
 
+        loginDiv.style.display = 'none';
+        panelDiv.style.display = 'block';
+        renderAdminBookings();
+        renderAdminCars();
         form.reset();
     });
 
-    document.getElementById('adminLogout').addEventListener('click', () => {
+    document.getElementById('adminLogout').addEventListener('click', async () => {
+        if (USE_API && apiToken) {
+            try { await apiPost('/logout'); } catch {}
+            apiToken = '';
+            localStorage.removeItem('apiToken');
+        }
         loginDiv.style.display = 'block';
         panelDiv.style.display = 'none';
+        document.getElementById('adminPass').value = '';
     });
 }
 
@@ -750,14 +797,26 @@ function initApiConfig() {
 
     input.value = API_BASE;
 
+    const statusEl = document.createElement('p');
+    statusEl.style.cssText = 'margin-top:12px;font-size:0.9rem;';
+    if (USE_API) {
+        statusEl.innerHTML = apiToken
+            ? '<span style="color:var(--success);">Terhubung ke API &#10003;</span>'
+            : '<span style="color:var(--warning);">Mode API aktif, tapi belum login ke admin</span>';
+    }
+    form.after(statusEl);
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const url = input.value.trim().replace(/\/+$/, '');
         if (url) {
             localStorage.setItem('apiBase', url);
+            if (apiToken) localStorage.setItem('apiToken', apiToken);
             alert('API Base URL disimpan. Refresh halaman untuk menggunakan backend.');
         } else {
             localStorage.removeItem('apiBase');
+            localStorage.removeItem('apiToken');
+            apiToken = '';
             alert('Mode localStorage diaktifkan. Refresh halaman untuk menggunakan data lokal.');
         }
     });
