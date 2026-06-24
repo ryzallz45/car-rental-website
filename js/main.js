@@ -1,3 +1,6 @@
+const API_BASE = localStorage.getItem('apiBase') || '';
+const USE_API = !!API_BASE;
+
 const DEFAULT_CARS = [
     { id: 1, name: 'Toyota Avanza', category: 'MPV', price: 350000, image: 'https://images.unsplash.com/photo-1623869675781-51aa7ad5fec8?w=400&h=250&fit=crop', seats: 7, transmission: 'Manual', fuel: 'Bensin', available: true, description: 'Mobil keluarga 7 seater yang nyaman dan irit bahan bakar.' },
     { id: 2, name: 'Honda Civic', category: 'Sedan', price: 500000, image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=400&h=250&fit=crop', seats: 5, transmission: 'Automatic', fuel: 'Bensin', available: true, description: 'Sedan sporty dengan desain elegan dan performa tangguh.' },
@@ -18,28 +21,73 @@ const STORAGE_KEYS = {
     bookings: 'rentalBookings',
 };
 
-function loadData(key, fallback) {
+let cars = [];
+let bookings = [];
+
+async function apiGet(endpoint) {
+    const res = await fetch(`${API_BASE}/api${endpoint}`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const json = await res.json();
+    return json.data || json;
+}
+
+async function apiPost(endpoint, body) {
+    const res = await fetch(`${API_BASE}/api${endpoint}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return await res.json();
+}
+
+async function apiPut(endpoint, body) {
+    const res = await fetch(`${API_BASE}/api${endpoint}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return await res.json();
+}
+
+async function apiDelete(endpoint) {
+    const res = await fetch(`${API_BASE}/api${endpoint}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
+async function loadFromApi() {
     try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : fallback;
+        cars = await apiGet('/cars');
+        bookings = await apiGet('/bookings');
+        return true;
     } catch {
-        return fallback;
+        return false;
     }
 }
 
-function saveData(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+async function loadFromStorage() {
+    try {
+        const c = localStorage.getItem(STORAGE_KEYS.cars);
+        cars = c ? JSON.parse(c) : [...DEFAULT_CARS];
+        const b = localStorage.getItem(STORAGE_KEYS.bookings);
+        bookings = b ? JSON.parse(b) : [];
+        return true;
+    } catch {
+        cars = [...DEFAULT_CARS];
+        bookings = [];
+        return true;
+    }
 }
 
-let cars = loadData(STORAGE_KEYS.cars, DEFAULT_CARS);
-let bookings = loadData(STORAGE_KEYS.bookings, []);
-
 function saveCars() {
-    saveData(STORAGE_KEYS.cars, cars);
+    if (!USE_API) {
+        localStorage.setItem(STORAGE_KEYS.cars, JSON.stringify(cars));
+    }
 }
 
 function saveBookings() {
-    saveData(STORAGE_KEYS.bookings, bookings);
+    if (!USE_API) {
+        localStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(bookings));
+    }
 }
 
 function formatPrice(num) {
@@ -50,8 +98,14 @@ function getNextId(arr) {
     return arr.length ? Math.max(...arr.map(i => i.id)) + 1 : 1;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initNavigation();
+    initModals();
+    initApiConfig();
+
+    const loaded = USE_API ? await loadFromApi() : await loadFromStorage();
+    if (!loaded) await loadFromStorage();
+
     renderCars();
     populateBookingCarSelect();
     initBookingForm();
@@ -59,14 +113,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initAdminLogin();
     initCarForm();
     initContactForm();
-    initModals();
     observeStats();
     renderAdminBookings();
     renderAdminCars();
 
-    document.getElementById('filterCategory').addEventListener('change', () => renderCars());
-    document.getElementById('filterTransmission').addEventListener('change', () => renderCars());
-    document.getElementById('filterSort').addEventListener('change', () => renderCars());
+    if (!USE_API) {
+        document.getElementById('filterCategory').addEventListener('change', () => renderCars());
+        document.getElementById('filterTransmission').addEventListener('change', () => renderCars());
+        document.getElementById('filterSort').addEventListener('change', () => renderCars());
+    } else {
+        document.getElementById('filterCategory').addEventListener('change', () => fetchAndRenderCars());
+        document.getElementById('filterTransmission').addEventListener('change', () => fetchAndRenderCars());
+        document.getElementById('filterSort').addEventListener('change', () => fetchAndRenderCars());
+    }
 
     document.getElementById('bookCar').addEventListener('change', updateBookingTotal);
     document.getElementById('bookStart').addEventListener('change', updateBookingTotal);
@@ -146,6 +205,23 @@ function renderCars(filteredCars) {
             </div>
         </div>
     `).join('');
+}
+
+async function fetchAndRenderCars() {
+    try {
+        const category = document.getElementById('filterCategory').value;
+        const transmission = document.getElementById('filterTransmission').value;
+        const sort = document.getElementById('filterSort').value;
+        const params = new URLSearchParams();
+        if (category !== 'all') params.set('category', category);
+        if (transmission !== 'all') params.set('transmission', transmission);
+        if (sort !== 'default') params.set('sort', sort);
+        const qs = params.toString();
+        cars = await apiGet('/cars' + (qs ? '?' + qs : ''));
+        renderCars(cars);
+    } catch {
+        renderCars([]);
+    }
 }
 
 function getFilteredCars() {
@@ -243,7 +319,7 @@ function initBookingForm() {
         updateBookingTotal();
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const carId = parseInt(document.getElementById('bookCar').value);
@@ -277,25 +353,48 @@ function initBookingForm() {
 
         const total = car.price * diffDays;
 
-        const booking = {
-            id: getNextId(bookings),
-            carId: car.id,
-            carName: car.name,
-            customerName: name,
-            phone,
-            email,
-            address,
-            startDate: start,
-            endDate: end,
-            days: diffDays,
-            totalPrice: total,
-            status: 'confirmed',
-            notes,
-            createdAt: new Date().toISOString(),
-        };
+        if (USE_API) {
+            try {
+                await apiPost('/bookings', {
+                    carId: car.id,
+                    carName: car.name,
+                    customerName: name,
+                    phone,
+                    email,
+                    address,
+                    startDate: start,
+                    endDate: end,
+                    days: diffDays,
+                    totalPrice: total,
+                    status: 'confirmed',
+                    notes,
+                });
+                bookings = await apiGet('/bookings');
+            } catch (err) {
+                alert('Gagal booking melalui server: ' + err.message);
+                return;
+            }
+        } else {
+            const booking = {
+                id: getNextId(bookings),
+                carId: car.id,
+                carName: car.name,
+                customerName: name,
+                phone,
+                email,
+                address,
+                startDate: start,
+                endDate: end,
+                days: diffDays,
+                totalPrice: total,
+                status: 'confirmed',
+                notes,
+                createdAt: new Date().toISOString(),
+            };
+            bookings.push(booking);
+            saveBookings();
+        }
 
-        bookings.push(booking);
-        saveBookings();
         renderAdminBookings();
 
         document.getElementById('modalCustomerName').textContent = name;
@@ -322,13 +421,16 @@ function initAdminLogin() {
     const loginDiv = document.getElementById('adminLogin');
     const panelDiv = document.getElementById('adminPanel');
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const pass = document.getElementById('adminPass').value;
 
         if (pass === 'admin123') {
             loginDiv.style.display = 'none';
             panelDiv.style.display = 'block';
+            if (USE_API) {
+                await loadFromApi();
+            }
             renderAdminBookings();
             renderAdminCars();
         } else {
@@ -403,21 +505,39 @@ function renderAdminBookings() {
     `).join('');
 }
 
-function updateBookingStatus(id, status) {
-    const booking = bookings.find(b => b.id === id);
-    if (booking) {
-        booking.status = status;
+async function updateBookingStatus(id, status) {
+    if (USE_API) {
+        try {
+            await apiPut(`/bookings/${id}/status`, { status });
+            bookings = await apiGet('/bookings');
+        } catch (err) {
+            alert('Gagal update status: ' + err.message);
+            return;
+        }
+    } else {
+        const booking = bookings.find(b => b.id === id);
+        if (booking) booking.status = status;
         saveBookings();
-        renderAdminBookings();
     }
+    renderAdminBookings();
 }
 
 function confirmDeleteBooking(id) {
     document.getElementById('deleteModalMessage').textContent =
         'Apakah Anda yakin ingin menghapus booking #' + id + '?';
-    document.getElementById('confirmDelete').onclick = () => {
-        bookings = bookings.filter(b => b.id !== id);
-        saveBookings();
+    document.getElementById('confirmDelete').onclick = async () => {
+        if (USE_API) {
+            try {
+                await apiDelete(`/bookings/${id}`);
+                bookings = await apiGet('/bookings');
+            } catch (err) {
+                alert('Gagal hapus booking: ' + err.message);
+                return;
+            }
+        } else {
+            bookings = bookings.filter(b => b.id !== id);
+            saveBookings();
+        }
         renderAdminBookings();
         document.getElementById('deleteModal').classList.remove('active');
     };
@@ -458,7 +578,7 @@ function initCarForm() {
     const form = document.getElementById('carForm');
     const cancelBtn = document.getElementById('carFormCancel');
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const id = document.getElementById('carFormId').value;
@@ -470,33 +590,35 @@ function initCarForm() {
         const transmission = document.getElementById('carTransmission').value;
         const description = document.getElementById('carDescription').value.trim();
 
-        if (id) {
-            const car = cars.find(c => c.id === parseInt(id));
-            if (car) {
-                car.name = name;
-                car.category = category;
-                car.price = price;
-                car.image = image;
-                car.seats = seats;
-                car.transmission = transmission;
-                car.description = description;
+        if (USE_API) {
+            try {
+                const payload = { name, category, price, image, seats, transmission, description, available: true, fuel: 'Bensin' };
+                if (id) {
+                    await apiPut(`/cars/${id}`, payload);
+                } else {
+                    await apiPost('/cars', payload);
+                }
+                cars = await apiGet('/cars');
+            } catch (err) {
+                alert('Gagal simpan mobil: ' + err.message);
+                return;
             }
         } else {
-            cars.push({
-                id: getNextId(cars),
-                name,
-                category,
-                price,
-                image,
-                seats,
-                transmission,
-                fuel: 'Bensin',
-                available: true,
-                description,
-            });
+            if (id) {
+                const car = cars.find(c => c.id === parseInt(id));
+                if (car) {
+                    Object.assign(car, { name, category, price, image, seats, transmission, description });
+                }
+            } else {
+                cars.push({
+                    id: getNextId(cars),
+                    name, category, price, image, seats, transmission,
+                    fuel: 'Bensin', available: true, description,
+                });
+            }
+            saveCars();
         }
 
-        saveCars();
         renderCars();
         renderAdminCars();
         populateBookingCarSelect();
@@ -533,11 +655,22 @@ function editCar(id) {
 }
 
 function confirmDeleteCar(id) {
+    const carName = cars.find(c => c.id === id)?.name;
     document.getElementById('deleteModalMessage').textContent =
-        'Apakah Anda yakin ingin menghapus mobil ' + cars.find(c => c.id === id)?.name + '?';
-    document.getElementById('confirmDelete').onclick = () => {
-        cars = cars.filter(c => c.id !== id);
-        saveCars();
+        'Apakah Anda yakin ingin menghapus mobil ' + carName + '?';
+    document.getElementById('confirmDelete').onclick = async () => {
+        if (USE_API) {
+            try {
+                await apiDelete(`/cars/${id}`);
+                cars = await apiGet('/cars');
+            } catch (err) {
+                alert('Gagal hapus mobil: ' + err.message);
+                return;
+            }
+        } else {
+            cars = cars.filter(c => c.id !== id);
+            saveCars();
+        }
         renderCars();
         renderAdminCars();
         populateBookingCarSelect();
@@ -608,4 +741,24 @@ function animateCounter(el) {
     }
 
     requestAnimationFrame(update);
+}
+
+function initApiConfig() {
+    const input = document.getElementById('apiBaseUrl');
+    const form = document.getElementById('apiConfigForm');
+    if (!input || !form) return;
+
+    input.value = API_BASE;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = input.value.trim().replace(/\/+$/, '');
+        if (url) {
+            localStorage.setItem('apiBase', url);
+            alert('API Base URL disimpan. Refresh halaman untuk menggunakan backend.');
+        } else {
+            localStorage.removeItem('apiBase');
+            alert('Mode localStorage diaktifkan. Refresh halaman untuk menggunakan data lokal.');
+        }
+    });
 }

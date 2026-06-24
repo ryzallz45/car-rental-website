@@ -232,6 +232,9 @@
                     <button class="admin-tab" data-tab="add-car">
                         <i class="fas fa-plus-circle"></i> Tambah Mobil
                     </button>
+                    <button class="admin-tab" data-tab="api-config">
+                        <i class="fas fa-plug"></i> API
+                    </button>
                     <button class="admin-tab btn-logout" id="adminLogout">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
@@ -336,6 +339,55 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    <div class="admin-tab-content" id="tab-api-config">
+                        <h3>Konfigurasi API Backend</h3>
+                        <p style="margin-bottom:20px;color:var(--text-light);">Frontend dapat menggunakan localStorage (tanpa backend) atau terhubung ke Laravel / Spring Boot API.</p>
+                        <form class="car-form" id="apiConfigForm">
+                            <div class="form-group">
+                                <label for="apiBaseUrl">Base URL Backend</label>
+                                <div class="form-row" style="grid-template-columns:1fr auto;gap:8px;">
+                                    <input type="text" id="apiBaseUrl" placeholder="http://localhost:8000" style="font-family:monospace;">
+                                    <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+                                        <i class="fas fa-link"></i> Hubungkan
+                                    </button>
+                                </div>
+                                <small style="color:var(--text-light);">
+                                    Kosongkan untuk mode localStorage. Isi URL backend (Laravel: http://localhost:8000, Spring Boot: http://localhost:8080)
+                                </small>
+                            </div>
+                        </form>
+                        <div style="margin-top:24px;padding:16px;background:var(--primary-light);border-radius:8px;">
+                            <h4 style="margin-bottom:8px;">Cara Menjalankan Backend</h4>
+                            <div style="font-size:0.9rem;line-height:1.8;">
+                                <strong>Laravel:</strong>
+                                <pre style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;margin:8px 0 16px;overflow-x:auto;">
+cd backend-laravel
+copy .env.example .env   # lalu atur DB_DATABASE=car_rental
+php artisan migrate --seed
+php artisan serve</pre>
+                                <strong>Spring Boot:</strong>
+                                <pre style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;margin:8px 0 0;overflow-x:auto;">
+cd backend-springboot
+# Atur MySQL database car_rental terlebih dahulu
+mvn spring-boot:run</pre>
+                            </div>
+                        </div>
+                        <div style="margin-top:24px;padding:16px;background:var(--bg-alt);border-radius:8px;border:1px solid var(--border);">
+                            <h4 style="margin-bottom:8px;">Endpoint API</h4>
+                            <div style="font-size:0.85rem;line-height:1.8;color:var(--text-light);">
+                                <code>GET /api/cars</code> - Daftar semua mobil<br>
+                                <code>GET /api/cars/{id}</code> - Detail mobil<br>
+                                <code>POST /api/cars</code> - Tambah mobil (admin)<br>
+                                <code>PUT /api/cars/{id}</code> - Edit mobil (admin)<br>
+                                <code>DELETE /api/cars/{id}</code> - Hapus mobil (admin)<br>
+                                <code>GET /api/bookings</code> - Daftar booking (admin)<br>
+                                <code>POST /api/bookings</code> - Buat booking<br>
+                                <code>PUT /api/bookings/{id}/status</code> - Update status booking (admin)<br>
+                                <code>DELETE /api/bookings/{id}</code> - Hapus booking (admin)
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

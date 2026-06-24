@@ -1,0 +1,1 @@
+-- Initial seed data is handled by CommandLineRunner in CarRentalApplication.java
