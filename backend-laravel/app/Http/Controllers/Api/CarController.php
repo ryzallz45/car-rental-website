@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Validator;
 
 class CarController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $cars = Car::all();
-        return response()->json(['data' => $cars]);
+        $perPage = $request->integer('per_page', 12);
+        $cars = Car::paginate($perPage);
+        return response()->json($cars);
     }
 
     public function show(Car $car): JsonResponse
@@ -27,7 +28,7 @@ class CarController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'required|string|in:MPV,SUV,Sedan,Hatchback,Luxury',
             'price' => 'required|integer|min:0',
-            'image' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'seats' => 'required|integer|min:1',
             'transmission' => 'required|string|in:Manual,Automatic',
             'fuel' => 'nullable|string|max:50',
@@ -39,7 +40,14 @@ class CarController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $car = Car::create($validator->validated());
+        $data = $validator->validated();
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('cars', 'public');
+            $data['image'] = asset('storage/' . $path);
+        }
+
+        $car = Car::create($data);
         return response()->json(['data' => $car], 201);
     }
 
@@ -49,7 +57,7 @@ class CarController extends Controller
             'name' => 'sometimes|string|max:255',
             'category' => 'sometimes|string|in:MPV,SUV,Sedan,Hatchback,Luxury',
             'price' => 'sometimes|integer|min:0',
-            'image' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'seats' => 'sometimes|integer|min:1',
             'transmission' => 'sometimes|string|in:Manual,Automatic',
             'fuel' => 'nullable|string|max:50',
@@ -61,7 +69,14 @@ class CarController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $car->update($validator->validated());
+        $data = $validator->validated();
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('cars', 'public');
+            $data['image'] = asset('storage/' . $path);
+        }
+
+        $car->update($data);
         return response()->json(['data' => $car]);
     }
 

@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $bookings = Booking::with('car')->get();
-        return response()->json(['data' => $bookings]);
+        $perPage = $request->integer('per_page', 10);
+        $bookings = Booking::with('car')->orderBy('created_at', 'desc')->paginate($perPage);
+        return response()->json($bookings);
     }
 
     public function show(Booking $booking): JsonResponse
