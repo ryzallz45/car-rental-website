@@ -25,6 +25,56 @@ let cars = [];
 let bookings = [];
 
 let apiToken = localStorage.getItem('apiToken') || '';
+let loadingCount = 0;
+
+function showCarsLoading() {
+    const grid = document.getElementById('carsGrid');
+    loadingCount++;
+    grid.innerHTML = `
+        <div class="skeleton-grid" id="carsSkeleton">
+            ${Array(6).fill(`
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-line skeleton-line-sm"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line skeleton-line-xs"></div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>`;
+}
+
+function hideCarsLoading() {
+    loadingCount = Math.max(0, loadingCount - 1);
+}
+
+function setLoading(btn, loading, text) {
+    if (loading) {
+        btn.disabled = true;
+        btn.classList.add('btn-loading');
+        if (!btn.querySelector('.spinner')) {
+            btn.insertAdjacentHTML('afterbegin', '<span class="spinner"></span>');
+        }
+        const span = btn.querySelector('.btn-text') || document.createElement('span');
+        if (!btn.querySelector('.btn-text')) {
+            span.className = 'btn-text';
+            span.textContent = btn.textContent;
+            btn.textContent = '';
+            btn.appendChild(span);
+        }
+    } else {
+        btn.disabled = false;
+        btn.classList.remove('btn-loading');
+        const spinner = btn.querySelector('.spinner');
+        if (spinner) spinner.remove();
+        const span = btn.querySelector('.btn-text');
+        if (span) {
+            btn.textContent = span.textContent;
+            span.remove();
+        }
+    }
+}
 
 function apiHeaders(extra = {}) {
     const headers = { 'Content-Type': 'application/json', ...extra };
@@ -139,7 +189,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loaded = USE_API ? await loadFromApi() : await loadFromStorage();
     if (!loaded) await loadFromStorage();
 
+    showCarsLoading();
     renderCars();
+    hideCarsLoading();
     populateBookingCarSelect();
     initBookingForm();
     initAdminTab();
@@ -241,6 +293,7 @@ function renderCars(filteredCars) {
 }
 
 async function fetchAndRenderCars() {
+    showCarsLoading();
     try {
         const category = document.getElementById('filterCategory').value;
         const transmission = document.getElementById('filterTransmission').value;
@@ -255,6 +308,7 @@ async function fetchAndRenderCars() {
     } catch {
         renderCars([]);
     }
+    hideCarsLoading();
 }
 
 function getFilteredCars() {
@@ -385,6 +439,8 @@ function initBookingForm() {
         }
 
         const total = car.price * diffDays;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        setLoading(submitBtn, true);
 
         if (USE_API) {
             try {
@@ -403,6 +459,7 @@ function initBookingForm() {
                 });
                 bookings = await apiGet('/bookings');
             } catch (err) {
+                setLoading(submitBtn, false);
                 alert('Gagal booking melalui server: ' + err.message);
                 return;
             }
@@ -428,6 +485,7 @@ function initBookingForm() {
         }
 
         renderAdminBookings();
+        setLoading(submitBtn, false);
 
         document.getElementById('modalCustomerName').textContent = name;
         document.getElementById('modalCarName').textContent = car.name;
@@ -457,6 +515,8 @@ function initAdminLogin() {
         e.preventDefault();
         const email = document.getElementById('adminEmail').value.trim();
         const pass = document.getElementById('adminPass').value;
+        const loginBtn = form.querySelector('button[type="submit"]');
+        setLoading(loginBtn, true);
 
         if (USE_API) {
             try {
@@ -465,15 +525,18 @@ function initAdminLogin() {
                 localStorage.setItem('apiToken', apiToken);
                 await loadFromApi();
             } catch (err) {
+                setLoading(loginBtn, false);
                 alert('Login gagal: ' + err.message);
                 return;
             }
         } else if (pass !== 'admin123') {
             alert('Password salah! Coba lagi.');
+            setLoading(loginBtn, false);
             form.reset();
             return;
         }
 
+        setLoading(loginBtn, false);
         loginDiv.style.display = 'none';
         panelDiv.style.display = 'block';
         renderAdminBookings();
@@ -636,6 +699,8 @@ function initCarForm() {
         const seats = parseInt(document.getElementById('carSeats').value);
         const transmission = document.getElementById('carTransmission').value;
         const description = document.getElementById('carDescription').value.trim();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        setLoading(submitBtn, true);
 
         if (USE_API) {
             try {
@@ -647,6 +712,7 @@ function initCarForm() {
                 }
                 cars = await apiGet('/cars');
             } catch (err) {
+                setLoading(submitBtn, false);
                 alert('Gagal simpan mobil: ' + err.message);
                 return;
             }
@@ -669,6 +735,7 @@ function initCarForm() {
         renderCars();
         renderAdminCars();
         populateBookingCarSelect();
+        setLoading(submitBtn, false);
         form.reset();
         document.getElementById('carFormId').value = '';
         cancelBtn.style.display = 'none';
