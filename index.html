@@ -96,45 +96,53 @@
                     <i class="fas fa-info-circle"></i>
                     <p>Silakan pilih mobil terlebih dahulu dari halaman <a href="#cars">Daftar Mobil</a> atau pilih langsung di form.</p>
                 </div>
-                <form class="booking-form" id="bookingForm">
-                    <div class="form-group">
-                        <label for="bookCar">Pilih Mobil</label>
-                        <select id="bookCar" required></select>
-                    </div>
-                    <div class="form-row">
+                    <form class="booking-form" id="bookingForm" novalidate>
                         <div class="form-group">
-                            <label for="bookName">Nama Lengkap</label>
-                            <input type="text" id="bookName" placeholder="Masukkan nama Anda" required>
+                            <label for="bookCar">Pilih Mobil</label>
+                            <select id="bookCar" name="car_id" required></select>
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookName">Nama Lengkap</label>
+                                <input type="text" id="bookName" name="customer_name" placeholder="Masukkan nama Anda" required>
+                                <div class="form-error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookPhone">No. Telepon</label>
+                                <input type="tel" id="bookPhone" name="phone" placeholder="08xxxxxxxxxx" required>
+                                <div class="form-error"></div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookEmail">Email</label>
+                                <input type="email" id="bookEmail" name="email" placeholder="email@example.com" required>
+                                <div class="form-error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookAddress">Alamat</label>
+                                <input type="text" id="bookAddress" name="address" placeholder="Alamat lengkap" required>
+                                <div class="form-error"></div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookStart">Tanggal Mulai</label>
+                                <input type="date" id="bookStart" name="start_date" required>
+                                <div class="form-error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookEnd">Tanggal Selesai</label>
+                                <input type="date" id="bookEnd" name="end_date" required>
+                                <div class="form-error"></div>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="bookPhone">No. Telepon</label>
-                            <input type="tel" id="bookPhone" placeholder="08xxxxxxxxxx" required>
+                            <label for="bookNotes">Catatan Tambahan</label>
+                            <textarea id="bookNotes" name="notes" placeholder="Catatan (opsional)"></textarea>
+                            <div class="form-error"></div>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bookEmail">Email</label>
-                            <input type="email" id="bookEmail" placeholder="email@example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookAddress">Alamat</label>
-                            <input type="text" id="bookAddress" placeholder="Alamat lengkap" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bookStart">Tanggal Mulai</label>
-                            <input type="date" id="bookStart" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookEnd">Tanggal Selesai</label>
-                            <input type="date" id="bookEnd" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="bookNotes">Catatan Tambahan</label>
-                        <textarea id="bookNotes" placeholder="Catatan (opsional)"></textarea>
-                    </div>
                     <div class="booking-total" id="bookingTotal">
                         <span>Total: </span>
                         <strong>Rp 0</strong>
@@ -288,50 +296,57 @@
 
                     <div class="admin-tab-content" id="tab-add-car">
                         <h3>Tambah / Edit Mobil</h3>
-                        <form class="car-form" id="carForm">
+                        <form class="car-form" id="carForm" novalidate>
                             <input type="hidden" id="carFormId">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="carName">Nama Mobil</label>
-                                    <input type="text" id="carName" required>
+                                    <input type="text" id="carName" name="name" required>
+                                    <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="carCategory">Kategori</label>
-                                    <select id="carCategory" required>
+                                    <select id="carCategory" name="category" required>
                                         <option value="MPV">MPV</option>
                                         <option value="SUV">SUV</option>
                                         <option value="Sedan">Sedan</option>
                                         <option value="Hatchback">Hatchback</option>
                                         <option value="Luxury">Luxury</option>
                                     </select>
+                                    <div class="form-error"></div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="carPrice">Harga per Hari (Rp)</label>
-                                    <input type="number" id="carPrice" required>
+                                    <input type="number" id="carPrice" name="price" required>
+                                    <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="carImage">URL Gambar</label>
-                                    <input type="url" id="carImage" placeholder="https://..." required>
+                                    <input type="url" id="carImage" name="image" placeholder="https://..." required>
+                                    <div class="form-error"></div>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="carSeats">Jumlah Kursi</label>
-                                    <input type="number" id="carSeats" required>
+                                    <input type="number" id="carSeats" name="seats" required>
+                                    <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="carTransmission">Transmisi</label>
-                                    <select id="carTransmission" required>
+                                    <select id="carTransmission" name="transmission" required>
                                         <option value="Manual">Manual</option>
                                         <option value="Automatic">Matic</option>
                                     </select>
+                                    <div class="form-error"></div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="carDescription">Deskripsi</label>
-                                <textarea id="carDescription" rows="3"></textarea>
+                                <textarea id="carDescription" name="description" rows="3"></textarea>
+                                <div class="form-error"></div>
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">
@@ -464,6 +479,7 @@ php artisan serve</pre>
         <i class="fab fa-whatsapp"></i>
     </a>
 
+    <div class="toast-container" id="toastContainer"></div>
     <script src="js/main.js"></script>
 </body>
 </html>
