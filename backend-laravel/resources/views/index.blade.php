@@ -471,6 +471,13 @@ php artisan serve</pre>
         </div>
     </footer>
 
+    <div class="modal" id="carDetailModal">
+        <div class="modal-content modal-lg">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body" id="carDetailBody" style="text-align:left;padding:0;"></div>
+        </div>
+    </div>
+
     <div class="modal" id="bookingModal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>

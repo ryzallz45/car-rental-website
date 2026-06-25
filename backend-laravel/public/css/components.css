@@ -360,6 +360,7 @@
 }
 
 .modal-sm { max-width: 400px; }
+.modal-lg { max-width: 700px; }
 
 .modal-close {
     position: sticky;
@@ -653,6 +654,122 @@
 .page-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+/* Car Detail Modal */
+.car-detail-image {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    background: var(--bg-alt);
+}
+
+.car-detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.car-detail-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.car-detail-badge.available { background: rgba(34,197,94,0.9); color: #fff; }
+.car-detail-badge.unavailable { background: rgba(239,68,68,0.9); color: #fff; }
+
+.car-detail-info { padding: 28px; }
+
+.car-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.car-detail-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.car-detail-price {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary);
+    white-space: nowrap;
+}
+
+.car-detail-price small {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.car-detail-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.car-detail-spec {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-alt);
+    border-radius: var(--radius-sm);
+}
+
+.car-detail-spec i {
+    font-size: 1.1rem;
+    color: var(--primary);
+    width: 20px;
+}
+
+.car-detail-spec div strong {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.car-detail-spec div span {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.car-detail-desc {
+    margin-bottom: 24px;
+}
+
+.car-detail-desc h4 {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: var(--text-light);
+}
+
+.car-detail-desc p {
+    color: var(--text);
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    .car-detail-image { height: 200px; }
+    .car-detail-specs { grid-template-columns: 1fr; }
+    .car-detail-header h2 { font-size: 1.2rem; }
+    .car-detail-price { font-size: 1.1rem; }
 }
 
 /* Misc */

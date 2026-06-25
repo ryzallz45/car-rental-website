@@ -138,10 +138,48 @@ function selectCarForBooking(carId) {
 function showCarDetail(carId) {
     const car = cars.find(c => c.id === carId);
     if (!car) return;
-    showToast(
-        `Kategori: ${car.category} | ${car.seats} Kursi | ${car.transmission} | ${car.fuel}\n${car.description}`,
-        'info', `${car.name} - ${formatPrice(car.price)}/hari`
-    );
+
+    const body = document.getElementById('carDetailBody');
+    body.innerHTML = `
+        <div class="car-detail-image">
+            <img src="${car.image}" alt="${car.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22400%22 fill=%22%23e2e8f0%22><rect width=%22800%22 height=%22400%22/><text x=%22400%22 y=%22215%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-size=%2224%22>${car.name}</text></svg>'">
+            <span class="car-detail-badge ${car.available ? 'available' : 'unavailable'}">
+                ${car.available ? 'Tersedia' : 'Tidak Tersedia'}
+            </span>
+        </div>
+        <div class="car-detail-info">
+            <div class="car-detail-header">
+                <h2>${car.name}</h2>
+                <span class="car-detail-price">${formatPrice(car.price)} <small>/ hari</small></span>
+            </div>
+            <div class="car-detail-specs">
+                <div class="car-detail-spec">
+                    <i class="fas fa-tag"></i>
+                    <div><strong>Kategori</strong><span>${car.category}</span></div>
+                </div>
+                <div class="car-detail-spec">
+                    <i class="fas fa-users"></i>
+                    <div><strong>Kursi</strong><span>${car.seats} Kursi</span></div>
+                </div>
+                <div class="car-detail-spec">
+                    <i class="fas fa-cog"></i>
+                    <div><strong>Transmisi</strong><span>${car.transmission}</span></div>
+                </div>
+                <div class="car-detail-spec">
+                    <i class="fas fa-gas-pump"></i>
+                    <div><strong>Bahan Bakar</strong><span>${car.fuel || 'Bensin'}</span></div>
+                </div>
+            </div>
+            <div class="car-detail-desc">
+                <h4>Deskripsi</h4>
+                <p>${car.description || 'Tidak ada deskripsi.'}</p>
+            </div>
+            <a href="#booking" class="btn btn-primary btn-block" onclick="selectCarForBooking(${car.id}); document.getElementById('carDetailModal').classList.remove('active');">
+                <i class="fas fa-calendar-check"></i> Sewa Sekarang
+            </a>
+        </div>
+    `;
+    document.getElementById('carDetailModal').classList.add('active');
 }
 
 function populateBookingCarSelect() {
