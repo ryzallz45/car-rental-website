@@ -21,14 +21,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateBookingCarSelect();
     initBookingForm();
     initAdminTab();
-    initAdminLogin();
     initCarForm();
     initContactForm();
-    renderAdminBookings();
-    renderAdminCars();
-    renderBookingEditCarSelect();
-    initBookingEdit();
-    renderDashboard();
+    await initAdminLogin();
+    initMyBookingsNav();
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'admin') {
+        renderAdminBookings();
+        renderAdminCars();
+        renderBookingEditCarSelect();
+        initBookingEdit();
+        renderDashboard();
+    }
+    if (userRole === 'customer') {
+        renderMyBookings();
+    }
 
     const searchInput = document.getElementById('bookingSearchInput');
     if (searchInput) {
@@ -146,4 +153,27 @@ function animateCounter(el) {
     }
 
     requestAnimationFrame(update);
+}
+
+function initMyBookingsNav() {
+    const navItem = document.getElementById('navMyBookings');
+    const navAdmin = document.getElementById('navAdminLink');
+    const userRole = localStorage.getItem('userRole');
+
+    if (userRole && userRole !== 'admin') {
+        navItem.style.display = '';
+        if (navAdmin) {
+            navAdmin.innerHTML = '<a href="#" class="btn-admin-nav" id="navLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>';
+            document.getElementById('navLogoutBtn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (USE_API && apiToken) {
+                    try { await apiPost('/logout'); } catch {}
+                }
+                apiToken = '';
+                localStorage.removeItem('apiToken');
+                localStorage.removeItem('userRole');
+                window.location.href = '/';
+            });
+        }
+    }
 }

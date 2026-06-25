@@ -27,6 +27,12 @@ function removeToast(toast) {
     setTimeout(() => toast.remove(), 300);
 }
 
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function formatPrice(num) {
     return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }

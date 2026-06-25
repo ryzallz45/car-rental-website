@@ -154,6 +154,7 @@
                 }
 
                 localStorage.setItem('apiToken', json.data.token);
+                if (json.data.role) localStorage.setItem('userRole', json.data.role);
                 window.location.href = '/';
             } catch (err) {
                 alert.textContent = err.message;

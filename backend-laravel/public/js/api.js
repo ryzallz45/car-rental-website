@@ -101,6 +101,7 @@ async function apiLogin(email, password) {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || 'Login gagal');
+    if (json.data.role) localStorage.setItem('userRole', json.data.role);
     return json.data;
 }
 

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@rentalmobil.com',
             'password' => bcrypt('admin123'),
+            'role' => 'admin',
         ]);
 
         Car::create([

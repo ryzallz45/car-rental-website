@@ -24,7 +24,8 @@
                 <li><a href="#cars">Mobil</a></li>
                 <li><a href="#booking">Booking</a></li>
                 <li><a href="#contact">Kontak</a></li>
-                <li><a href="/login" class="btn-admin-nav">Admin</a></li>
+                <li id="navMyBookings" style="display:none;"><a href="#my-bookings">Riwayat Saya</a></li>
+                <li id="navAdminLink"><a href="/login" class="btn-admin-nav">Admin</a></li>
             </ul>
         </div>
     </nav>
@@ -208,6 +209,21 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Kirim Pesan</button>
                 </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="my-bookings" class="section my-bookings-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Riwayat Penyewaan Saya</h2>
+                <p>Daftar booking mobil yang pernah Anda lakukan</p>
+            </div>
+            <div id="myBookingsContent">
+                <div style="text-align:center;padding:40px;color:var(--text-light);">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                    <p style="margin-top:12px;">Memuat riwayat booking...</p>
+                </div>
             </div>
         </div>
     </section>

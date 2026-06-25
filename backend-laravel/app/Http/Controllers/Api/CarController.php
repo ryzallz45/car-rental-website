@@ -27,12 +27,16 @@ class CarController extends Controller
         elseif ($sort === 'price-desc') $query->orderBy('price', 'desc');
         elseif ($sort === 'name') $query->orderBy('name');
 
-        $cars = $query->paginate($perPage);
+        $cars = $query->withAvg('reviews as rating_avg', 'rating')
+                      ->withCount('reviews as rating_count')
+                      ->paginate($perPage);
         return response()->json($cars);
     }
 
     public function show(Car $car): JsonResponse
     {
+        $car->loadAvg('reviews as rating_avg', 'rating')
+             ->loadCount('reviews as rating_count');
         return response()->json(['data' => $car]);
     }
 

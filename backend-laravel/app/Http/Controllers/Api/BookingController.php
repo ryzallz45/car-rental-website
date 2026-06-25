@@ -122,4 +122,15 @@ class BookingController extends Controller
         $booking->delete();
         return response()->json(null, 204);
     }
+
+    public function myBookings(): JsonResponse
+    {
+        $user = auth()->user();
+        $bookings = Booking::with('car')
+            ->where('email', $user->email)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json(['data' => $bookings]);
+    }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StatsController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,20 +12,27 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:au
 
 Route::get('cars', [CarController::class, 'index']);
 Route::get('cars/{car}', [CarController::class, 'show']);
+Route::get('cars/{car}/reviews', [ReviewController::class, 'index']);
+Route::post('reviews', [ReviewController::class, 'store']);
 Route::post('bookings', [BookingController::class, 'store']);
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
-    Route::get('/stats', [StatsController::class, 'index']);
+    Route::get('/my-bookings', [BookingController::class, 'myBookings']);
 
-    Route::post('cars', [CarController::class, 'store']);
-    Route::put('cars/{car}', [CarController::class, 'update']);
-    Route::delete('cars/{car}', [CarController::class, 'destroy']);
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/stats', [StatsController::class, 'index']);
 
-    Route::get('bookings', [BookingController::class, 'index']);
-    Route::get('bookings/{booking}', [BookingController::class, 'show']);
-    Route::put('bookings/{booking}', [BookingController::class, 'update']);
-    Route::put('bookings/{booking}/status', [BookingController::class, 'updateStatus']);
-    Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
+        Route::post('cars', [CarController::class, 'store']);
+        Route::put('cars/{car}', [CarController::class, 'update']);
+        Route::delete('cars/{car}', [CarController::class, 'destroy']);
+
+        Route::get('bookings', [BookingController::class, 'index']);
+        Route::get('bookings/{booking}', [BookingController::class, 'show']);
+        Route::put('bookings/{booking}', [BookingController::class, 'update']);
+        Route::put('bookings/{booking}/status', [BookingController::class, 'updateStatus']);
+        Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
+        Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
+    });
 });

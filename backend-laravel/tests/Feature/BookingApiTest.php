@@ -118,6 +118,27 @@ class BookingApiTest extends TestCase
         $this->assertDatabaseMissing('bookings', ['id' => $booking->id]);
     }
 
+    public function test_can_get_my_bookings_as_authenticated_user()
+    {
+        $user = User::factory()->create(['email' => 'customer@test.com']);
+        $token = $user->createToken('test')->plainTextToken;
+
+        Booking::factory()->create(['email' => 'customer@test.com']);
+        Booking::factory()->create(['email' => 'other@test.com']);
+
+        $response = $this->withToken($token)
+            ->getJson('/api/my-bookings');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_cannot_get_my_bookings_without_auth()
+    {
+        $response = $this->getJson('/api/my-bookings');
+        $response->assertUnauthorized();
+    }
+
     public function test_cannot_create_booking_with_non_existent_car()
     {
         $response = $this->postJson('/api/bookings', [

@@ -183,6 +183,7 @@
                 alert.className = 'alert success';
 
                 localStorage.setItem('apiToken', json.data.token);
+                if (json.data.role) localStorage.setItem('userRole', json.data.role);
                 setTimeout(() => window.location.href = '/', 1000);
             } catch (err) {
                 alert.textContent = err.message;

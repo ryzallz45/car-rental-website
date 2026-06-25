@@ -1,10 +1,47 @@
-function initAdminLogin() {
+async function initAdminLogin() {
     const promptDiv = document.getElementById('adminLoginPrompt');
     const panelDiv = document.getElementById('adminPanel');
+    let userRole = localStorage.getItem('userRole') || '';
 
-    if (apiToken) {
+    if (apiToken && !userRole && USE_API) {
+        try {
+            const userData = await apiGet('/user');
+            userRole = userData.role || '';
+            if (userRole) localStorage.setItem('userRole', userRole);
+        } catch {}
+    }
+
+    const showAdmin = apiToken && userRole === 'admin';
+
+    if (showAdmin) {
         promptDiv.style.display = 'none';
         panelDiv.style.display = 'block';
+    } else if (apiToken && userRole === 'customer') {
+        promptDiv.style.display = 'block';
+        panelDiv.style.display = 'none';
+        promptDiv.querySelector('.admin-login-box').innerHTML = `
+            <i class="fas fa-user" style="font-size:3rem;color:var(--text-light);margin-bottom:16px;"></i>
+            <h3>Akun Customer</h3>
+            <p style="color:var(--text-light);margin-bottom:20px;">Anda login sebagai customer. Hanya admin yang dapat mengakses panel ini.</p>
+            <button class="btn btn-outline" id="customerBackBtn" style="color:var(--text);border-color:var(--border);margin-bottom:12px;">
+                <i class="fas fa-arrow-left"></i> Kembali ke Beranda
+            </button>
+            <button class="btn btn-danger" id="customerLogoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        `;
+        document.getElementById('customerBackBtn').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+        document.getElementById('customerLogoutBtn').addEventListener('click', async () => {
+            if (USE_API && apiToken) {
+                try { await apiPost('/logout'); } catch {}
+            }
+            apiToken = '';
+            localStorage.removeItem('apiToken');
+            localStorage.removeItem('userRole');
+            window.location.href = '/';
+        });
     } else {
         promptDiv.style.display = 'block';
         panelDiv.style.display = 'none';
@@ -15,6 +52,7 @@ function initAdminLogin() {
             try { await apiPost('/logout'); } catch {}
             apiToken = '';
             localStorage.removeItem('apiToken');
+            localStorage.removeItem('userRole');
         }
         promptDiv.style.display = 'block';
         panelDiv.style.display = 'none';

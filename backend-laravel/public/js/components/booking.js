@@ -65,7 +65,10 @@ function initBookingForm() {
                     days: diffDays, total_price: total,
                     status: 'confirmed', notes,
                 });
-                bookings = await apiGet('/bookings');
+                if (localStorage.getItem('userRole') === 'admin') {
+                    bookings = await apiGet('/bookings');
+                    renderAdminBookings();
+                }
             } catch (err) {
                 setLoading(submitBtn, false);
                 showToast(err.message, 'error', 'Booking Gagal');
@@ -82,9 +85,8 @@ function initBookingForm() {
             };
             bookings.push(booking);
             saveBookings();
+            renderAdminBookings();
         }
-
-        renderAdminBookings();
         setLoading(submitBtn, false);
 
         document.getElementById('modalCustomerName').textContent = name;
@@ -104,4 +106,67 @@ function initBookingForm() {
         document.querySelector('#bookingTotal strong').textContent = 'Rp 0';
         populateBookingCarSelect();
     });
+}
+
+async function renderMyBookings() {
+    const container = document.getElementById('myBookingsContent');
+    if (!container) return;
+
+    try {
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--text-light);">
+                <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                <p style="margin-top:12px;">Memuat riwayat booking...</p>
+            </div>
+        `;
+
+        const data = await apiGet('/my-bookings');
+        const bookings = Array.isArray(data) ? data : [];
+
+        if (bookings.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="text-align:center;padding:60px 20px;">
+                    <i class="fas fa-calendar-times" style="font-size:3rem;color:var(--text-light);margin-bottom:16px;"></i>
+                    <h3 style="margin-bottom:8px;">Belum Ada Riwayat</h3>
+                    <p style="color:var(--text-light);margin-bottom:20px;">Anda belum melakukan booking mobil. Silakan booking mobil terlebih dahulu.</p>
+                    <a href="#booking" class="btn btn-primary"><i class="fas fa-car"></i> Booking Sekarang</a>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Mobil</th>
+                            <th>Tanggal Sewa</th>
+                            <th>Durasi</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bookings.map(b => `
+                            <tr>
+                                <td><strong>${b.car?.name || '—'}</strong></td>
+                                <td>${formatDate(b.start_date)} — ${formatDate(b.end_date)}</td>
+                                <td>${b.days} hari</td>
+                                <td>${formatPrice(b.total_price)}</td>
+                                <td><span class="booking-status status-${b.status}">${b.status.charAt(0).toUpperCase() + b.status.slice(1)}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (err) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--text-light);">
+                <i class="fas fa-exclamation-circle" style="font-size:2rem;color:var(--danger);margin-bottom:12px;"></i>
+                <p>Gagal memuat riwayat booking. Silakan coba lagi.</p>
+            </div>
+        `;
+    }
 }
