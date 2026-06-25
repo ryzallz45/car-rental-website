@@ -12,10 +12,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderCars();
         }
         hideCarsLoading();
-    } else {
-        await loadFromStorage();
-        renderCars();
-    }
+        } else {
+            await loadFromStorage();
+            renderCars();
+            renderCarsPagination();
+        }
 
     populateBookingCarSelect();
     initBookingForm();
@@ -27,13 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderAdminCars();
 
     if (!USE_API) {
-        document.getElementById('filterCategory').addEventListener('change', () => renderCars());
-        document.getElementById('filterTransmission').addEventListener('change', () => renderCars());
-        document.getElementById('filterSort').addEventListener('change', () => renderCars());
+        document.getElementById('filterCategory').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });
+        document.getElementById('filterTransmission').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });
+        document.getElementById('filterSort').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });
     } else {
-        document.getElementById('filterCategory').addEventListener('change', () => fetchAndRenderCars());
-        document.getElementById('filterTransmission').addEventListener('change', () => fetchAndRenderCars());
-        document.getElementById('filterSort').addEventListener('change', () => fetchAndRenderCars());
+        document.getElementById('filterCategory').addEventListener('change', () => fetchAndRenderCars(1));
+        document.getElementById('filterTransmission').addEventListener('change', () => fetchAndRenderCars(1));
+        document.getElementById('filterSort').addEventListener('change', () => fetchAndRenderCars(1));
     }
 
     document.getElementById('bookCar').addEventListener('change', updateBookingTotal);

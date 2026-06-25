@@ -21,12 +21,23 @@ const STORAGE_KEYS = {
 let cars = [];
 let bookings = [];
 
+let carsPagination = { currentPage: 1, lastPage: 1, total: 0, perPage: 8 };
+let bookingsPagination = { currentPage: 1, lastPage: 1, total: 0, perPage: 100 };
+
 async function loadFromApi() {
     try {
         showCarsLoading();
-        cars = await apiGet('/cars');
+        const res = await apiGetRaw(`/cars?per_page=${carsPagination.perPage}&page=1`);
+        cars = res.data || [];
+        carsPagination.currentPage = res.current_page || 1;
+        carsPagination.lastPage = res.last_page || 1;
+        carsPagination.total = res.total || 0;
         if (apiToken) {
-            bookings = await apiGet('/bookings').catch(() => []);
+            const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
+            bookings = bRes.data || [];
+            bookingsPagination.currentPage = bRes.current_page || 1;
+            bookingsPagination.lastPage = bRes.last_page || 1;
+            bookingsPagination.total = bRes.total || 0;
         }
         hideCarsLoading();
         return true;

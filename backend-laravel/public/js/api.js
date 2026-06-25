@@ -10,6 +10,16 @@ function apiHeaders(extra = {}) {
     return headers;
 }
 
+async function apiGetRaw(endpoint) {
+    const res = await fetch(`${API_BASE}/api${endpoint}`, { headers: apiHeaders() });
+    if (res.status === 204) return null;
+    if (!res.ok) {
+        const msg = await res.json().catch(() => ({}));
+        throw new Error(msg.message || `HTTP ${res.status}`);
+    }
+    return await res.json();
+}
+
 async function apiGet(endpoint) {
     const res = await fetch(`${API_BASE}/api${endpoint}`, { headers: apiHeaders() });
     if (res.status === 204) return null;

@@ -12,8 +12,22 @@ class CarController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $perPage = $request->integer('per_page', 100);
-        $cars = Car::paginate($perPage);
+        $perPage = $request->integer('per_page', 8);
+        $query = Car::query();
+
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+        if ($request->filled('transmission') && $request->transmission !== 'all') {
+            $query->where('transmission', $request->transmission);
+        }
+
+        $sort = $request->input('sort');
+        if ($sort === 'price-asc') $query->orderBy('price');
+        elseif ($sort === 'price-desc') $query->orderBy('price', 'desc');
+        elseif ($sort === 'name') $query->orderBy('name');
+
+        $cars = $query->paginate($perPage);
         return response()->json($cars);
     }
 

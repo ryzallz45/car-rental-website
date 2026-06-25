@@ -84,7 +84,11 @@ async function updateBookingStatus(id, status) {
     if (USE_API) {
         try {
             await apiPut(`/bookings/${id}/status`, { status });
-            bookings = await apiGet('/bookings');
+            const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
+            bookings = bRes.data || [];
+            bookingsPagination.currentPage = bRes.current_page || 1;
+            bookingsPagination.lastPage = bRes.last_page || 1;
+            bookingsPagination.total = bRes.total || 0;
         } catch (err) {
             showToast(err.message, 'error', 'Gagal Update Status');
             return;
@@ -105,7 +109,11 @@ function confirmDeleteBooking(id) {
         if (USE_API) {
             try {
                 await apiDelete(`/bookings/${id}`);
-                bookings = await apiGet('/bookings');
+                const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
+                bookings = bRes.data || [];
+                bookingsPagination.currentPage = bRes.current_page || 1;
+                bookingsPagination.lastPage = bRes.last_page || 1;
+                bookingsPagination.total = bRes.total || 0;
             } catch (err) {
                 showToast(err.message, 'error', 'Gagal Hapus');
                 return;
@@ -215,6 +223,10 @@ function initCarForm() {
                     await apiPostMultipart('/cars', formData);
                 }
                 cars = await apiGet('/cars');
+                const pRes = await apiGetRaw(`/cars?per_page=${carsPagination.perPage}&page=1`).catch(() => ({}));
+                carsPagination.currentPage = pRes.current_page || 1;
+                carsPagination.lastPage = pRes.last_page || 1;
+                carsPagination.total = pRes.total || 0;
             } catch (err) {
                 setLoading(submitBtn, false);
                 showToast(err.message, 'error', 'Gagal Simpan');
@@ -247,6 +259,7 @@ function initCarForm() {
         }
 
         renderCars();
+        renderCarsPagination();
         renderAdminCars();
         populateBookingCarSelect();
         setLoading(submitBtn, false);
@@ -301,7 +314,7 @@ function confirmDeleteCar(id) {
         if (USE_API) {
             try {
                 await apiDelete(`/cars/${id}`);
-                cars = await apiGet('/cars');
+                await fetchAndRenderCars(1);
             } catch (err) {
                 showToast(err.message, 'error', 'Gagal Hapus');
                 return;
@@ -310,7 +323,7 @@ function confirmDeleteCar(id) {
             cars = cars.filter(c => c.id !== id);
             saveCars();
         }
-        renderCars();
+        renderCarsPagination();
         renderAdminCars();
         populateBookingCarSelect();
         document.getElementById('deleteModal').classList.remove('active');

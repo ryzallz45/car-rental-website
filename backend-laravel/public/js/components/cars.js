@@ -1,6 +1,18 @@
 function renderCars(filteredCars) {
     const grid = document.getElementById('carsGrid');
-    const data = filteredCars || getFilteredCars();
+    let data = filteredCars || getFilteredCars();
+
+    if (!USE_API) {
+        const total = data.length;
+        const perPage = carsPagination.perPage;
+        const lastPage = Math.max(1, Math.ceil(total / perPage));
+        carsPagination.lastPage = lastPage;
+        carsPagination.total = total;
+        if (carsPagination.currentPage > lastPage) carsPagination.currentPage = lastPage;
+        const start = (carsPagination.currentPage - 1) * perPage;
+        data = data.slice(start, start + perPage);
+        renderCarsPagination();
+    }
 
     if (!data.length) {
         grid.innerHTML = '<div class="no-data"><i class="fas fa-car"></i><p>Tidak ada mobil yang tersedia.</p></div>';
@@ -39,23 +51,58 @@ function renderCars(filteredCars) {
     `).join('');
 }
 
-async function fetchAndRenderCars() {
+async function fetchAndRenderCars(page) {
     showCarsLoading();
     try {
+        page = page || carsPagination.currentPage;
         const category = document.getElementById('filterCategory').value;
         const transmission = document.getElementById('filterTransmission').value;
         const sort = document.getElementById('filterSort').value;
         const params = new URLSearchParams();
+        params.set('per_page', carsPagination.perPage);
+        params.set('page', page);
         if (category !== 'all') params.set('category', category);
         if (transmission !== 'all') params.set('transmission', transmission);
         if (sort !== 'default') params.set('sort', sort);
-        const qs = params.toString();
-        cars = await apiGet('/cars' + (qs ? '?' + qs : ''));
+        const res = await apiGetRaw('/cars?' + params.toString());
+        cars = res.data || [];
+        carsPagination.currentPage = res.current_page || 1;
+        carsPagination.lastPage = res.last_page || 1;
+        carsPagination.total = res.total || 0;
         renderCars(cars);
+        renderCarsPagination();
     } catch {
         renderCars([]);
     }
     hideCarsLoading();
+}
+
+function renderCarsPagination() {
+    const container = document.getElementById('carsPagination');
+    if (!container) return;
+    const { currentPage, lastPage, total } = carsPagination;
+    if (lastPage <= 1) { container.innerHTML = ''; return; }
+    let html = '<div class="pagination-info">' + total + ' mobil - Halaman ' + currentPage + '/' + lastPage + '</div><div class="pagination-btns">';
+    html += `<button class="page-btn" onclick="goToCarsPage(1)" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left"></i></button>`;
+    html += `<button class="page-btn" onclick="goToCarsPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-left"></i></button>`;
+    for (let i = Math.max(1, currentPage - 2); i <= Math.min(lastPage, currentPage + 2); i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToCarsPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" onclick="goToCarsPage(${currentPage + 1})" ${currentPage === lastPage ? 'disabled' : ''}><i class="fas fa-angle-right"></i></button>`;
+    html += `<button class="page-btn" onclick="goToCarsPage(${lastPage})" ${currentPage === lastPage ? 'disabled' : ''}><i class="fas fa-angle-double-right"></i></button>`;
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function goToCarsPage(page) {
+    if (page < 1 || page > carsPagination.lastPage || page === carsPagination.currentPage) return;
+    if (USE_API) {
+        fetchAndRenderCars(page);
+    } else {
+        carsPagination.currentPage = page;
+        renderCars();
+        renderCarsPagination();
+    }
 }
 
 function getFilteredCars() {

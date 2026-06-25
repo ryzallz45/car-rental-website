@@ -85,6 +85,7 @@
                 </div>
             </div>
             <div class="cars-grid" id="carsGrid"></div>
+            <div class="pagination" id="carsPagination"></div>
         </div>
     </section>
 
