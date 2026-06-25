@@ -24,6 +24,19 @@ let bookings = [];
 let carsPagination = { currentPage: 1, lastPage: 1, total: 0, perPage: 8 };
 let bookingsPagination = { currentPage: 1, lastPage: 1, total: 0, perPage: 100 };
 
+async function refreshBookings() {
+    if (USE_API && apiToken) {
+        try {
+            const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`);
+            bookings = bRes.data || [];
+            allBookings = [...bookings];
+            bookingsPagination.currentPage = bRes.current_page || 1;
+            bookingsPagination.lastPage = bRes.last_page || 1;
+            bookingsPagination.total = bRes.total || 0;
+        } catch {}
+    }
+}
+
 async function loadFromApi() {
     try {
         showCarsLoading();
@@ -33,11 +46,7 @@ async function loadFromApi() {
         carsPagination.lastPage = res.last_page || 1;
         carsPagination.total = res.total || 0;
         if (apiToken) {
-            const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
-            bookings = bRes.data || [];
-            bookingsPagination.currentPage = bRes.current_page || 1;
-            bookingsPagination.lastPage = bRes.last_page || 1;
-            bookingsPagination.total = bRes.total || 0;
+            await refreshBookings();
         }
         hideCarsLoading();
         return true;
@@ -64,6 +73,7 @@ async function loadFromStorage() {
         cars = c ? JSON.parse(c) : [...DEFAULT_CARS];
         const b = localStorage.getItem(STORAGE_KEYS.bookings);
         bookings = b ? JSON.parse(b) : [];
+        allBookings = [...bookings];
         return true;
     } catch {
         cars = [...DEFAULT_CARS];

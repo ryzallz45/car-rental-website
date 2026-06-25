@@ -276,6 +276,12 @@
                     </div>
                     <div class="admin-tab-content" id="tab-bookings">
                         <h3>Daftar Booking</h3>
+                        <div class="search-bar" id="bookingSearchBar">
+                            <input type="text" id="bookingSearchInput" placeholder="Cari nama, email, atau telepon..." />
+                            <button class="btn btn-primary" onclick="searchBookings()" style="padding:10px 20px;white-space:nowrap;">
+                                <i class="fas fa-search"></i> Cari
+                            </button>
+                        </div>
                         <div class="table-wrapper">
                             <table class="admin-table">
                                 <thead>

@@ -30,6 +30,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     initBookingEdit();
     renderDashboard();
 
+    const searchInput = document.getElementById('bookingSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') searchBookings(); });
+    }
+
     if (!USE_API) {
         document.getElementById('filterCategory').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });
         document.getElementById('filterTransmission').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });

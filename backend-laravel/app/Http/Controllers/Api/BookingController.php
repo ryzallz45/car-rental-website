@@ -14,7 +14,18 @@ class BookingController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->integer('per_page', 10);
-        $bookings = Booking::with('car')->orderBy('created_at', 'desc')->paginate($perPage);
+        $query = Booking::with('car');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $bookings = $query->orderBy('created_at', 'desc')->paginate($perPage);
         return response()->json($bookings);
     }
 

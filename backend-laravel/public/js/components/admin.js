@@ -83,15 +83,43 @@ function renderAdminBookings() {
     `).join('');
 }
 
-async function updateBookingStatus(id, status) {
+async function searchBookings() {
+    const input = document.getElementById('bookingSearchInput');
+    const query = input.value.trim();
+
     if (USE_API) {
+        const params = new URLSearchParams();
+        params.set('per_page', bookingsPagination.perPage);
+        params.set('page', 1);
+        if (query) params.set('search', query);
         try {
-            await apiPut(`/bookings/${id}/status`, { status });
-            const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
+            const bRes = await apiGetRaw('/bookings?' + params.toString());
             bookings = bRes.data || [];
             bookingsPagination.currentPage = bRes.current_page || 1;
             bookingsPagination.lastPage = bRes.last_page || 1;
             bookingsPagination.total = bRes.total || 0;
+        } catch {
+            showToast('Gagal mencari booking.', 'error');
+            return;
+        }
+    } else {
+        bookings = allBookings.filter(b =>
+            !query ||
+            (b.customerName || b.customer_name || '').toLowerCase().includes(query.toLowerCase()) ||
+            (b.email || '').toLowerCase().includes(query.toLowerCase()) ||
+            (b.phone || '').includes(query)
+        );
+    }
+    renderAdminBookings();
+}
+
+let allBookings = [];
+
+async function updateBookingStatus(id, status) {
+    if (USE_API) {
+        try {
+            await apiPut(`/bookings/${id}/status`, { status });
+            await refreshBookings();
         } catch (err) {
             showToast(err.message, 'error', 'Gagal Update Status');
             return;
@@ -112,11 +140,7 @@ function confirmDeleteBooking(id) {
         if (USE_API) {
             try {
                 await apiDelete(`/bookings/${id}`);
-                const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
-                bookings = bRes.data || [];
-                bookingsPagination.currentPage = bRes.current_page || 1;
-                bookingsPagination.lastPage = bRes.last_page || 1;
-                bookingsPagination.total = bRes.total || 0;
+                await refreshBookings();
             } catch (err) {
                 showToast(err.message, 'error', 'Gagal Hapus');
                 return;
@@ -500,11 +524,7 @@ function initBookingEdit() {
         if (USE_API) {
             try {
                 await apiPut(`/bookings/${id}`, payload);
-                const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
-                bookings = bRes.data || [];
-                bookingsPagination.currentPage = bRes.current_page || 1;
-                bookingsPagination.lastPage = bRes.last_page || 1;
-                bookingsPagination.total = bRes.total || 0;
+                await refreshBookings();
             } catch (err) {
                 setLoading(submitBtn, false);
                 showToast(err.message, 'error', 'Gagal Update');
