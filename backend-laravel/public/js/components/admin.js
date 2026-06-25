@@ -71,6 +71,9 @@ function renderAdminBookings() {
                             <i class="fas fa-times"></i>
                         </button>
                     ` : ''}
+                    <button class="action-btn edit" onclick="editBooking(${b.id})" title="Edit">
+                        <i class="fas fa-pen"></i>
+                    </button>
                     <button class="action-btn delete" onclick="confirmDeleteBooking(${b.id})" title="Hapus">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -304,6 +307,100 @@ function editCar(id) {
     document.getElementById('carFormCancel').style.display = 'inline-flex';
     document.querySelector('.admin-tab[data-tab="add-car"]').click();
     window.scrollTo({ top: document.getElementById('admin').offsetTop - 100, behavior: 'smooth' });
+}
+
+function renderBookingEditCarSelect() {
+    const select = document.getElementById('editBookCar');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- Pilih Mobil --</option>' +
+        cars.map(c =>
+            `<option value="${c.id}">${c.name} - ${formatPrice(c.price)}/hari</option>`
+        ).join('');
+}
+
+function editBooking(id) {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+
+    renderBookingEditCarSelect();
+
+    document.getElementById('editBookingId').value = booking.id;
+    document.getElementById('editBookCar').value = booking.carId || booking.car_id || '';
+    document.getElementById('editBookName').value = booking.customerName || booking.customer_name || '';
+    document.getElementById('editBookPhone').value = booking.phone || '';
+    document.getElementById('editBookEmail').value = booking.email || '';
+    document.getElementById('editBookAddress').value = booking.address || '';
+    document.getElementById('editBookStart').value = booking.startDate || booking.start_date || '';
+    document.getElementById('editBookEnd').value = booking.endDate || booking.end_date || '';
+    document.getElementById('editBookNotes').value = booking.notes || '';
+
+    document.getElementById('editBookingModal').classList.add('active');
+}
+
+function initBookingEdit() {
+    const form = document.getElementById('editBookingForm');
+    if (!form) return;
+
+    initFieldValidation(form);
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearFieldErrors();
+        if (!validateForm(form)) {
+            showToast('Periksa kembali input Anda.', 'warning', 'Validasi Gagal');
+            return;
+        }
+
+        const id = document.getElementById('editBookingId').value;
+        const payload = {
+            car_id: parseInt(document.getElementById('editBookCar').value),
+            customer_name: document.getElementById('editBookName').value.trim(),
+            phone: document.getElementById('editBookPhone').value.trim(),
+            email: document.getElementById('editBookEmail').value.trim(),
+            address: document.getElementById('editBookAddress').value.trim(),
+            start_date: document.getElementById('editBookStart').value,
+            end_date: document.getElementById('editBookEnd').value,
+            notes: document.getElementById('editBookNotes').value.trim(),
+        };
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        setLoading(submitBtn, true);
+
+        if (USE_API) {
+            try {
+                await apiPut(`/bookings/${id}`, payload);
+                const bRes = await apiGetRaw(`/bookings?per_page=${bookingsPagination.perPage}&page=1`).catch(() => ({}));
+                bookings = bRes.data || [];
+                bookingsPagination.currentPage = bRes.current_page || 1;
+                bookingsPagination.lastPage = bRes.last_page || 1;
+                bookingsPagination.total = bRes.total || 0;
+            } catch (err) {
+                setLoading(submitBtn, false);
+                showToast(err.message, 'error', 'Gagal Update');
+                return;
+            }
+        } else {
+            const booking = bookings.find(b => b.id === parseInt(id));
+            if (booking) {
+                Object.assign(booking, {
+                    carId: payload.car_id,
+                    customerName: payload.customer_name,
+                    phone: payload.phone,
+                    email: payload.email,
+                    address: payload.address,
+                    startDate: payload.start_date,
+                    endDate: payload.end_date,
+                    notes: payload.notes,
+                });
+            }
+            saveBookings();
+        }
+
+        setLoading(submitBtn, false);
+        renderAdminBookings();
+        document.getElementById('editBookingModal').classList.remove('active');
+        showToast('Booking berhasil diperbarui!', 'success');
+    });
 }
 
 function confirmDeleteCar(id) {

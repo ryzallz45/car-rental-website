@@ -22,6 +22,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     Route::get('bookings', [BookingController::class, 'index']);
     Route::get('bookings/{booking}', [BookingController::class, 'show']);
+    Route::put('bookings/{booking}', [BookingController::class, 'update']);
     Route::put('bookings/{booking}/status', [BookingController::class, 'updateStatus']);
     Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
 });

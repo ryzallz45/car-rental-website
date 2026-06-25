@@ -12,11 +12,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderCars();
         }
         hideCarsLoading();
-        } else {
-            await loadFromStorage();
-            renderCars();
-            renderCarsPagination();
-        }
+    } else {
+        await loadFromStorage();
+        renderCars();
+        renderCarsPagination();
+    }
 
     populateBookingCarSelect();
     initBookingForm();
@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initContactForm();
     renderAdminBookings();
     renderAdminCars();
+    renderBookingEditCarSelect();
+    initBookingEdit();
 
     if (!USE_API) {
         document.getElementById('filterCategory').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });

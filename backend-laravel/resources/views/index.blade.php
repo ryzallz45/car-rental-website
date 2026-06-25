@@ -464,6 +464,70 @@ php artisan serve</pre>
         </div>
     </div>
 
+    <div class="modal" id="editBookingModal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body" style="text-align:left;">
+                <h3 style="margin-bottom:20px;">Edit Booking</h3>
+                <form id="editBookingForm" novalidate>
+                    <input type="hidden" id="editBookingId">
+                    <div class="form-group">
+                        <label for="editBookCar">Mobil</label>
+                        <select id="editBookCar" name="car_id" data-validate="required"></select>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBookName">Nama Penyewa</label>
+                            <input type="text" id="editBookName" name="customer_name" data-validate="required,minLength:3">
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editBookPhone">No. Telepon</label>
+                            <input type="tel" id="editBookPhone" name="phone" data-validate="required,phone">
+                            <div class="form-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBookEmail">Email</label>
+                            <input type="email" id="editBookEmail" name="email" data-validate="required,email">
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editBookAddress">Alamat</label>
+                            <input type="text" id="editBookAddress" name="address" data-validate="required,minLength:5">
+                            <div class="form-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBookStart">Tanggal Mulai</label>
+                            <input type="date" id="editBookStart" name="start_date" data-validate="required">
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editBookEnd">Tanggal Selesai</label>
+                            <input type="date" id="editBookEnd" name="end_date" data-validate="required">
+                            <div class="form-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editBookNotes">Catatan</label>
+                        <textarea id="editBookNotes" name="notes" rows="2"></textarea>
+                        <div class="form-error"></div>
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:16px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                        <button type="button" class="btn btn-outline modal-close-btn" style="color:var(--text);border-color:var(--border);">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="deleteModal">
         <div class="modal-content modal-sm">
             <span class="modal-close">&times;</span>

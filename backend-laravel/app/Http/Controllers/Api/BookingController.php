@@ -72,6 +72,40 @@ class BookingController extends Controller
         return response()->json(['data' => $booking]);
     }
 
+    public function update(Request $request, Booking $booking): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'car_id' => 'sometimes|exists:cars,id',
+            'customer_name' => 'sometimes|string|max:255',
+            'phone' => 'sometimes|string|max:20',
+            'email' => 'sometimes|email|max:255',
+            'address' => 'sometimes|string',
+            'start_date' => 'sometimes|date',
+            'end_date' => 'sometimes|date|after_or_equal:start_date',
+            'status' => 'nullable|string|in:confirmed,pending,completed,cancelled',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $validator->validated();
+
+        if (isset($data['car_id']) || isset($data['start_date']) || isset($data['end_date'])) {
+            $car = \App\Models\Car::findOrFail($data['car_id'] ?? $booking->car_id);
+            $start = Carbon::parse($data['start_date'] ?? $booking->start_date);
+            $end = Carbon::parse($data['end_date'] ?? $booking->end_date);
+            $data['days'] = $start->diffInDays($end) + 1;
+            $data['total_price'] = $data['days'] * $car->price;
+        }
+
+        $booking->update($data);
+        $booking->load('car');
+
+        return response()->json(['data' => $booking]);
+    }
+
     public function destroy(Booking $booking): JsonResponse
     {
         $booking->delete();
