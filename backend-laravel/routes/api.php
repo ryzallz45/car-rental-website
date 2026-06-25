@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
+use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StatsController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,7 @@ Route::get('cars', [CarController::class, 'index']);
 Route::get('cars/{car}', [CarController::class, 'show']);
 Route::get('cars/{car}/reviews', [ReviewController::class, 'index']);
 Route::post('reviews', [ReviewController::class, 'store']);
+Route::post('promos/validate', [PromoController::class, 'validate']);
 Route::post('bookings', [BookingController::class, 'store']);
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
@@ -34,5 +36,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::put('bookings/{booking}/status', [BookingController::class, 'updateStatus']);
         Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
         Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
+        Route::get('promos', [PromoController::class, 'index']);
+        Route::post('promos', [PromoController::class, 'store']);
+        Route::put('promos/{promo}', [PromoController::class, 'update']);
+        Route::delete('promos/{promo}', [PromoController::class, 'destroy']);
     });
 });

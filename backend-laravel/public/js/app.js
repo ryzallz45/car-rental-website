@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     populateBookingCarSelect();
     initBookingForm();
+    initPromoInput();
     initAdminTab();
     initCarForm();
     initContactForm();
@@ -32,6 +33,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderBookingEditCarSelect();
         initBookingEdit();
         renderDashboard();
+        initPromoForm();
+        renderAdminPromos();
     }
     if (userRole === 'customer') {
         renderMyBookings();

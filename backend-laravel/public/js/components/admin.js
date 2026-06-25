@@ -617,3 +617,136 @@ function confirmDeleteCar(id) {
     };
     document.getElementById('deleteModal').classList.add('active');
 }
+
+/* ───── Promo Admin ───── */
+
+let promos = [];
+
+async function renderAdminPromos() {
+    if (!USE_API) return;
+    try {
+        const res = await apiGetRaw('/promos');
+        promos = res.data || [];
+    } catch {
+        promos = [];
+    }
+
+    const tbody = document.getElementById('promosTableBody');
+    if (!tbody) return;
+
+    if (promos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-light);padding:24px;">Belum ada kode promo.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = promos.map(p => {
+        const discountLabel = p.discount_type === 'percentage' ? p.discount_value + '%' : formatPrice(p.discount_value);
+        const now = new Date();
+        const validFrom = new Date(p.valid_from + 'T00:00:00');
+        const validUntil = new Date(p.valid_until + 'T00:00:00');
+        const expired = now > validUntil;
+        const active = p.is_active && !expired;
+        return `
+            <tr>
+                <td><strong>${p.code}</strong></td>
+                <td>${discountLabel}${p.max_discount ? ' (max ' + formatPrice(p.max_discount) + ')' : ''}</td>
+                <td>${p.min_rental_days || '—'}</td>
+                <td>${formatDate(p.valid_from)} — ${formatDate(p.valid_until)}</td>
+                <td>${p.used_count}${p.usage_limit ? '/' + p.usage_limit : ''}</td>
+                <td><span class="booking-status ${active ? 'status-confirmed' : 'status-cancelled'}">${active ? 'Aktif' : expired ? 'Kadaluarsa' : 'Nonaktif'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick="editPromo(${p.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="confirmDeletePromo(${p.id})" title="Hapus"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function initPromoForm() {
+    const form = document.getElementById('promoForm');
+    if (!form) return;
+
+    initFieldValidation(form);
+
+    document.getElementById('promoFormCancel').addEventListener('click', () => {
+        resetPromoForm();
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearFieldErrors();
+        if (!validateForm(form)) return;
+
+        const id = document.getElementById('promoFormId').value;
+        const payload = {
+            code: document.getElementById('promoCode').value.trim(),
+            discount_type: document.getElementById('promoDiscountType').value,
+            discount_value: parseInt(document.getElementById('promoDiscountValue').value),
+            max_discount: document.getElementById('promoMaxDiscount').value ? parseInt(document.getElementById('promoMaxDiscount').value) : null,
+            min_rental_days: document.getElementById('promoMinDays').value ? parseInt(document.getElementById('promoMinDays').value) : null,
+            usage_limit: document.getElementById('promoUsageLimit').value ? parseInt(document.getElementById('promoUsageLimit').value) : null,
+            valid_from: document.getElementById('promoValidFrom').value,
+            valid_until: document.getElementById('promoValidUntil').value,
+            is_active: document.getElementById('promoIsActive').checked,
+        };
+
+        try {
+            if (id) {
+                await apiPut('/promos/' + id, payload);
+                showToast('Promo berhasil diperbarui.', 'success');
+            } else {
+                await apiPost('/promos', payload);
+                showToast('Promo berhasil ditambahkan.', 'success');
+            }
+            resetPromoForm();
+            await renderAdminPromos();
+        } catch (err) {
+            showToast(err.message, 'error', 'Gagal');
+        }
+    });
+}
+
+function resetPromoForm() {
+    document.getElementById('promoFormId').value = '';
+    document.getElementById('promoForm').reset();
+    document.getElementById('promoIsActive').checked = true;
+    document.getElementById('promoFormTitle').textContent = 'Tambah Promo Baru';
+    document.getElementById('promoFormCancel').style.display = 'none';
+}
+
+async function editPromo(id) {
+    const promo = promos.find(p => p.id === id);
+    if (!promo) return;
+
+    document.getElementById('promoFormId').value = promo.id;
+    document.getElementById('promoCode').value = promo.code;
+    document.getElementById('promoDiscountType').value = promo.discount_type;
+    document.getElementById('promoDiscountValue').value = promo.discount_value;
+    document.getElementById('promoMaxDiscount').value = promo.max_discount || '';
+    document.getElementById('promoMinDays').value = promo.min_rental_days || '';
+    document.getElementById('promoUsageLimit').value = promo.usage_limit || '';
+    document.getElementById('promoValidFrom').value = promo.valid_from;
+    document.getElementById('promoValidUntil').value = promo.valid_until;
+    document.getElementById('promoIsActive').checked = promo.is_active;
+    document.getElementById('promoFormTitle').textContent = 'Edit Promo';
+    document.getElementById('promoFormCancel').style.display = '';
+    document.getElementById('tab-promos').scrollIntoView({ behavior: 'smooth' });
+}
+
+function confirmDeletePromo(id) {
+    const promo = promos.find(p => p.id === id);
+    if (!promo) return;
+    document.getElementById('deleteModalMessage').textContent = `Hapus kode promo "${promo.code}"?`;
+    document.getElementById('confirmDelete').onclick = async () => {
+        try {
+            await apiDelete('/promos/' + id);
+            showToast('Promo berhasil dihapus.', 'success');
+            document.getElementById('deleteModal').classList.remove('active');
+            await renderAdminPromos();
+        } catch (err) {
+            showToast(err.message, 'error', 'Gagal Hapus');
+        }
+    };
+    document.getElementById('deleteModal').classList.add('active');
+}

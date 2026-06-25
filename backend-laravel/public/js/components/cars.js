@@ -386,5 +386,6 @@ function updateBookingTotal() {
     }
 
     const total = car.price * diffDays;
-    totalEl.textContent = formatPrice(total);
+    const finalTotal = Math.max(0, total - (appliedDiscount || 0));
+    totalEl.textContent = formatPrice(finalTotal);
 }

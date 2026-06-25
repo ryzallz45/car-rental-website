@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Promo;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class BookingController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'nullable|string|in:confirmed,pending,completed,cancelled',
             'notes' => 'nullable|string',
+            'promo_code' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -59,10 +61,25 @@ class BookingController extends Controller
         $start = Carbon::parse($data['start_date']);
         $end = Carbon::parse($data['end_date']);
         $data['days'] = $start->diffInDays($end) + 1;
-        $data['total_price'] = $data['days'] * $car->price;
+        $subtotal = $data['days'] * $car->price;
+
+        $data['discount_amount'] = 0;
+        unset($data['promo_code']);
+
+        if (!empty($request->promo_code)) {
+            $promo = Promo::where('code', $request->promo_code)->first();
+            if ($promo && $promo->isValid($data['days'])) {
+                $discount = $promo->calculateDiscount($subtotal, $data['days']);
+                $data['discount_amount'] = $discount;
+                $data['promo_id'] = $promo->id;
+                $promo->increment('used_count');
+            }
+        }
+
+        $data['total_price'] = $subtotal - $data['discount_amount'];
 
         $booking = Booking::create($data);
-        $booking->load('car');
+        $booking->load('car', 'promo');
 
         return response()->json(['data' => $booking], 201);
     }
@@ -108,11 +125,11 @@ class BookingController extends Controller
             $start = Carbon::parse($data['start_date'] ?? $booking->start_date);
             $end = Carbon::parse($data['end_date'] ?? $booking->end_date);
             $data['days'] = $start->diffInDays($end) + 1;
-            $data['total_price'] = $data['days'] * $car->price;
+            $data['total_price'] = $data['days'] * $car->price - $booking->discount_amount;
         }
 
         $booking->update($data);
-        $booking->load('car');
+        $booking->load('car', 'promo');
 
         return response()->json(['data' => $booking]);
     }

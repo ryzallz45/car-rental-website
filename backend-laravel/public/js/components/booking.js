@@ -1,3 +1,6 @@
+let appliedPromo = null;
+let appliedDiscount = 0;
+
 function initBookingForm() {
     const form = document.getElementById('bookingForm');
 
@@ -57,13 +60,15 @@ function initBookingForm() {
 
         if (USE_API) {
             try {
+                const actualTotal = total - appliedDiscount;
                 await apiPost('/bookings', {
                     car_id: car.id,
                     customer_name: name,
                     phone, email, address,
                     start_date: start, end_date: end,
-                    days: diffDays, total_price: total,
+                    days: diffDays, total_price: actualTotal,
                     status: 'confirmed', notes,
+                    promo_code: appliedPromo ? appliedPromo.code : null,
                 });
                 if (localStorage.getItem('userRole') === 'admin') {
                     bookings = await apiGet('/bookings');
@@ -101,10 +106,73 @@ function initBookingForm() {
             <p><strong>Total:</strong> ${formatPrice(total)}</p>
         `;
 
+        if (appliedPromo) {
+            document.getElementById('modalDetails').insertAdjacentHTML('beforeend', `
+                <p><strong>Kode Promo:</strong> ${appliedPromo.code} (diskon ${formatPrice(appliedDiscount)})</p>
+            `);
+        }
+
         document.getElementById('bookingModal').classList.add('active');
-        form.reset();
-        document.querySelector('#bookingTotal strong').textContent = 'Rp 0';
+        resetBookingForm();
         populateBookingCarSelect();
+    });
+}
+
+function resetBookingForm() {
+    document.getElementById('bookingForm').reset();
+    document.querySelector('#bookingTotal strong').textContent = 'Rp 0';
+    appliedPromo = null;
+    appliedDiscount = 0;
+    document.getElementById('promoCodeInput').value = '';
+    document.getElementById('promoAppliedInfo').style.display = 'none';
+    document.getElementById('promoErrorInfo').style.display = 'none';
+}
+
+function initPromoInput() {
+    const btn = document.getElementById('applyPromoBtn');
+    const input = document.getElementById('promoCodeInput');
+    if (!btn || !input) return;
+
+    btn.addEventListener('click', async () => {
+        const code = input.value.trim();
+        if (!code) return;
+
+        const carId = parseInt(document.getElementById('bookCar').value);
+        const start = document.getElementById('bookStart').value;
+        const end = document.getElementById('bookEnd').value;
+        if (!carId || !start || !end) {
+            showToast('Pilih mobil dan tanggal terlebih dahulu.', 'warning');
+            return;
+        }
+
+        const car = cars.find(c => c.id === carId);
+        if (!car) return;
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const days = Math.ceil(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24));
+        const subtotal = car.price * days;
+
+        try {
+            const res = await apiPost('/promos/validate', { code, subtotal, days });
+            if (res.valid) {
+                appliedPromo = res.promo;
+                appliedDiscount = res.discount;
+                const info = document.getElementById('promoAppliedInfo');
+                info.style.display = 'block';
+                info.innerHTML = `<i class="fas fa-check-circle"></i> Promo <strong>${code}</strong> berlaku! Diskon ${formatPrice(appliedDiscount)}`;
+                document.getElementById('promoErrorInfo').style.display = 'none';
+                updateBookingTotal();
+                showToast('Kode promo berhasil diterapkan!', 'success');
+            }
+        } catch (err) {
+            appliedPromo = null;
+            appliedDiscount = 0;
+            document.getElementById('promoAppliedInfo').style.display = 'none';
+            const errorInfo = document.getElementById('promoErrorInfo');
+            errorInfo.style.display = 'block';
+            errorInfo.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${err.message}`;
+            updateBookingTotal();
+        }
     });
 }
 

@@ -148,6 +148,16 @@
                             <textarea id="bookNotes" name="notes" placeholder="Catatan (opsional)"></textarea>
                             <div class="form-error"></div>
                         </div>
+                    <div class="promo-section" style="margin:16px 0;padding:12px;background:var(--bg-alt);border-radius:8px;border:1px solid var(--border);">
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" id="promoCodeInput" placeholder="Kode promo (opsional)" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);">
+                            <button type="button" class="btn btn-outline" id="applyPromoBtn" style="white-space:nowrap;padding:8px 16px;">
+                                <i class="fas fa-tag"></i> Pakai
+                            </button>
+                        </div>
+                        <div id="promoAppliedInfo" style="display:none;margin-top:8px;padding:8px 12px;background:var(--success-bg, #d4edda);border-radius:6px;color:var(--success, #155724);font-size:0.9rem;"></div>
+                        <div id="promoErrorInfo" style="display:none;margin-top:8px;padding:8px 12px;background:var(--danger-bg, #f8d7da);border-radius:6px;color:var(--danger, #721c24);font-size:0.9rem;"></div>
+                    </div>
                     <div class="booking-total" id="bookingTotal">
                         <span>Total: </span>
                         <strong>Rp 0</strong>
@@ -262,6 +272,9 @@
                     </button>
                     <button class="admin-tab" data-tab="add-car">
                         <i class="fas fa-plus-circle"></i> Tambah Mobil
+                    </button>
+                    <button class="admin-tab" data-tab="promos">
+                        <i class="fas fa-tags"></i> Promo
                     </button>
                     <button class="admin-tab" data-tab="api-config">
                         <i class="fas fa-plug"></i> API
@@ -400,6 +413,95 @@
                                     <i class="fas fa-save"></i> Simpan Mobil
                                 </button>
                                 <button type="button" class="btn btn-outline" id="carFormCancel" style="display:none;">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="admin-tab-content" id="tab-promos">
+                        <h3>Kode Promo</h3>
+                        <div class="table-wrapper" style="margin-bottom:24px;">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Kode</th>
+                                        <th>Diskon</th>
+                                        <th>Min Hari</th>
+                                        <th>Berlaku</th>
+                                        <th>Pemakaian</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="promosTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <h4 id="promoFormTitle">Tambah Promo Baru</h4>
+                        <form class="car-form" id="promoForm" novalidate>
+                            <input type="hidden" id="promoFormId">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="promoCode">Kode Promo</label>
+                                    <input type="text" id="promoCode" name="code" placeholder="Misal: PROMO50" data-validate="required,minLength:2">
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="promoDiscountType">Jenis Diskon</label>
+                                    <select id="promoDiscountType" name="discount_type" data-validate="required">
+                                        <option value="percentage">Persentase (%)</option>
+                                        <option value="fixed">Nominal (Rp)</option>
+                                    </select>
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="promoDiscountValue">Nilai Diskon</label>
+                                    <input type="number" id="promoDiscountValue" name="discount_value" placeholder="50 atau 50000" data-validate="required,positive">
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="promoMaxDiscount">Maks. Diskon (Rp) <small style="color:var(--text-light);">(opsional, untuk %)</small></label>
+                                    <input type="number" id="promoMaxDiscount" name="max_discount" placeholder="Kosongkan jika tanpa batas">
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="promoMinDays">Min. Hari Sewa <small style="color:var(--text-light);">(opsional)</small></label>
+                                    <input type="number" id="promoMinDays" name="min_rental_days" placeholder="Kosongkan jika tanpa minimal">
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="promoUsageLimit">Batas Pemakaian <small style="color:var(--text-light);">(opsional)</small></label>
+                                    <input type="number" id="promoUsageLimit" name="usage_limit" placeholder="Kosongkan jika tanpa batas">
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="promoValidFrom">Berlaku Mulai</label>
+                                    <input type="date" id="promoValidFrom" name="valid_from" data-validate="required">
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="promoValidUntil">Berlaku Sampai</label>
+                                    <input type="date" id="promoValidUntil" name="valid_until" data-validate="required">
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="promoIsActive" checked> Aktif
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Simpan Promo
+                                </button>
+                                <button type="button" class="btn btn-outline" id="promoFormCancel" style="display:none;">
                                     Batal
                                 </button>
                             </div>

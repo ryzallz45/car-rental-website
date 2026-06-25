@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'car_id', 'customer_name', 'phone', 'email', 'address',
     'start_date', 'end_date', 'days', 'total_price',
-    'status', 'notes',
+    'status', 'notes', 'promo_id', 'discount_amount',
 ])]
 class Booking extends Model
 {
@@ -28,5 +28,10 @@ class Booking extends Model
     public function car(): BelongsTo
     {
         return $this->belongsTo(Car::class);
+    }
+
+    public function promo(): BelongsTo
+    {
+        return $this->belongsTo(Promo::class);
     }
 }
