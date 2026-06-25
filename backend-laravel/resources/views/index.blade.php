@@ -273,6 +273,9 @@
                     <button class="admin-tab" data-tab="add-car">
                         <i class="fas fa-plus-circle"></i> Tambah Mobil
                     </button>
+                    <button class="admin-tab" data-tab="calendar">
+                        <i class="fas fa-calendar-alt"></i> Kalender
+                    </button>
                     <button class="admin-tab" data-tab="promos">
                         <i class="fas fa-tags"></i> Promo
                     </button>
@@ -417,6 +420,24 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    <div class="admin-tab-content" id="tab-calendar">
+                        <h3>Kalendar Booking</h3>
+                        <div class="calendar-nav">
+                            <button class="btn btn-outline" id="calPrevMonth"><i class="fas fa-chevron-left"></i></button>
+                            <h4 id="calMonthTitle"></h4>
+                            <button class="btn btn-outline" id="calNextMonth"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <div style="text-align:center;padding:40px;color:var(--text-light);">
+                                <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                                <p style="margin-top:12px;">Memuat kalendar...</p>
+                            </div>
+                        </div>
+                        <div class="calendar-legend" style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;">
+                            <span><span style="display:inline-block;width:14px;height:14px;background:#3b82f6;border-radius:3px;vertical-align:middle;margin-right:4px;"></span> Booking</span>
+                        </div>
                     </div>
 
                     <div class="admin-tab-content" id="tab-promos">

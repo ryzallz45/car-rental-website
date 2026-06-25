@@ -750,3 +750,110 @@ function confirmDeletePromo(id) {
     };
     document.getElementById('deleteModal').classList.add('active');
 }
+
+/* ───── Calendar ───── */
+
+let calYear, calMonth;
+
+function initCalendar() {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth() + 1;
+    renderCalendar();
+    document.getElementById('calPrevMonth').addEventListener('click', () => {
+        calMonth--;
+        if (calMonth < 1) { calMonth = 12; calYear--; }
+        renderCalendar();
+    });
+    document.getElementById('calNextMonth').addEventListener('click', () => {
+        calMonth++;
+        if (calMonth > 12) { calMonth = 1; calYear++; }
+        renderCalendar();
+    });
+}
+
+async function renderCalendar() {
+    const title = document.getElementById('calMonthTitle');
+    const grid = document.getElementById('calendarGrid');
+    if (!title || !grid) return;
+
+    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    title.textContent = months[calMonth - 1] + ' ' + calYear;
+
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i><p style="margin-top:12px;">Memuat kalendar...</p></div>';
+
+    if (!USE_API) {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1;">Kalendar tersedia saat menggunakan backend API.</div>';
+        return;
+    }
+
+    try {
+        const res = await apiGetRaw(`/calendar?year=${calYear}&month=${calMonth}`);
+        const bookings = res.data || [];
+        buildCalendarGrid(grid, bookings);
+    } catch {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1;">Gagal memuat kalendar.</div>';
+    }
+}
+
+function buildCalendarGrid(grid, bookings) {
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+    const daysInPrevMonth = new Date(calYear, calMonth - 1, 0).getDate();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+    const bookingsByDate = {};
+    bookings.forEach(b => {
+        const start = new Date(b.start_date + 'T00:00:00');
+        const end = new Date(b.end_date + 'T00:00:00');
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            if (!bookingsByDate[key]) bookingsByDate[key] = [];
+            if (bookingsByDate[key].length < 4) {
+                bookingsByDate[key].push(b);
+            }
+        }
+    });
+
+    let html = dayNames.map(d => `<div class="calendar-header">${d}</div>`).join('');
+
+    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+    for (let i = 0; i < totalCells; i++) {
+        let dayNum, isOther = false;
+        if (i < firstDay) {
+            dayNum = daysInPrevMonth - firstDay + i + 1;
+            isOther = true;
+        } else if (i >= firstDay + daysInMonth) {
+            dayNum = i - firstDay - daysInMonth + 1;
+            isOther = true;
+        } else {
+            dayNum = i - firstDay + 1;
+        }
+
+        const m = isOther && i < firstDay ? calMonth - 1 : isOther ? calMonth + 1 : calMonth;
+        const y = m < 1 ? calYear - 1 : m > 12 ? calYear + 1 : calYear;
+        const adjM = m < 1 ? 12 : m > 12 ? 1 : m;
+        const dateStr = `${y}-${String(adjM).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+        const isToday = !isOther && dateStr === todayStr;
+        const dayBookings = bookingsByDate[dateStr] || [];
+        const dayAllBookings = bookingsByDate[dateStr] || [];
+        const hasMore = dayAllBookings.length > 3;
+
+        html += `<div class="calendar-day${isOther ? ' other-month' : ''}${isToday ? ' today' : ''}">`;
+        html += `<div class="calendar-day-number">${dayNum}</div>`;
+        dayBookings.slice(0, 3).forEach(b => {
+            const status = b.status || 'confirmed';
+            const label = b.car?.name?.substring(0, 12) || 'Mobil';
+            html += `<div class="calendar-event event-${status}" onclick="showBookingDetail(${b.id})" title="${b.customer_name} - ${b.car?.name || ''}">${label}</div>`;
+        });
+        if (hasMore) {
+            html += `<div class="calendar-more" onclick="showDateBookings('${dateStr}')">+${dayAllBookings.length - 3} lagi</div>`;
+        }
+        html += `</div>`;
+    }
+
+    grid.innerHTML = html;
+}

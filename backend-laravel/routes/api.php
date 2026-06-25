@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\ReviewController;
@@ -40,5 +41,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('promos', [PromoController::class, 'store']);
         Route::put('promos/{promo}', [PromoController::class, 'update']);
         Route::delete('promos/{promo}', [PromoController::class, 'destroy']);
+        Route::get('calendar', [CalendarController::class, 'index']);
     });
 });

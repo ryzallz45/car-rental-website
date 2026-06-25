@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderDashboard();
         initPromoForm();
         renderAdminPromos();
+        initCalendar();
     }
     if (userRole === 'customer') {
         renderMyBookings();
