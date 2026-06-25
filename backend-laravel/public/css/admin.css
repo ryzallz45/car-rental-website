@@ -154,6 +154,14 @@
 
 .car-form { max-width: 600px; }
 
+.image-preview {
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    display: inline-block;
+}
+
 @media (max-width: 768px) {
     .admin-tabs { flex-wrap: wrap; }
     .admin-tab {

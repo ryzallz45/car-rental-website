@@ -324,9 +324,10 @@
                                     <div class="form-error"></div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="carImage">URL Gambar</label>
-                                    <input type="url" id="carImage" name="image" placeholder="https://..." data-validate="required,url">
+                                    <label for="carImage">Gambar Mobil</label>
+                                    <input type="file" id="carImage" name="image" accept="image/jpeg,image/png,image/jpg,image/webp">
                                     <div class="form-error"></div>
+                                    <div id="carImagePreview" class="image-preview" style="display:none;margin-top:8px;"></div>
                                 </div>
                             </div>
                             <div class="form-row">

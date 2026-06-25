@@ -154,8 +154,25 @@ function renderAdminCars() {
 function initCarForm() {
     const form = document.getElementById('carForm');
     const cancelBtn = document.getElementById('carFormCancel');
+    const imageInput = document.getElementById('carImage');
+    const imagePreview = document.getElementById('carImagePreview');
 
     initFieldValidation(form);
+
+    imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width:200px;max-height:150px;border-radius:6px;object-fit:cover;">`;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.style.display = 'none';
+            imagePreview.innerHTML = '';
+        }
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -169,7 +186,6 @@ function initCarForm() {
         const name = document.getElementById('carName').value.trim();
         const category = document.getElementById('carCategory').value;
         const price = parseInt(document.getElementById('carPrice').value);
-        const image = document.getElementById('carImage').value.trim();
         const seats = parseInt(document.getElementById('carSeats').value);
         const transmission = document.getElementById('carTransmission').value;
         const description = document.getElementById('carDescription').value.trim();
@@ -178,11 +194,25 @@ function initCarForm() {
 
         if (USE_API) {
             try {
-                const payload = { name, category, price, image, seats, transmission, description, available: true, fuel: 'Bensin' };
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('category', category);
+                formData.append('price', price);
+                formData.append('seats', seats);
+                formData.append('transmission', transmission);
+                formData.append('description', description);
+                formData.append('available', '1');
+                formData.append('fuel', 'Bensin');
+
+                const file = imageInput.files[0];
+                if (file) {
+                    formData.append('image', file);
+                }
+
                 if (id) {
-                    await apiPut(`/cars/${id}`, payload);
+                    await apiPutMultipart(`/cars/${id}`, formData);
                 } else {
-                    await apiPost('/cars', payload);
+                    await apiPostMultipart('/cars', formData);
                 }
                 cars = await apiGet('/cars');
             } catch (err) {
@@ -191,10 +221,20 @@ function initCarForm() {
                 return;
             }
         } else {
+            let image = '';
+            const file = imageInput.files[0];
+            if (file) {
+                image = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+
             if (id) {
                 const car = cars.find(c => c.id === parseInt(id));
                 if (car) {
-                    Object.assign(car, { name, category, price, image, seats, transmission, description });
+                    Object.assign(car, { name, category, price, image: image || car.image, seats, transmission, description });
                 }
             } else {
                 cars.push({
@@ -211,6 +251,8 @@ function initCarForm() {
         populateBookingCarSelect();
         setLoading(submitBtn, false);
         form.reset();
+        imagePreview.style.display = 'none';
+        imagePreview.innerHTML = '';
         document.getElementById('carFormId').value = '';
         cancelBtn.style.display = 'none';
         showToast('Mobil berhasil disimpan!', 'success');
@@ -218,6 +260,8 @@ function initCarForm() {
 
     cancelBtn.addEventListener('click', () => {
         form.reset();
+        imagePreview.style.display = 'none';
+        imagePreview.innerHTML = '';
         document.getElementById('carFormId').value = '';
         cancelBtn.style.display = 'none';
     });
@@ -231,10 +275,18 @@ function editCar(id) {
     document.getElementById('carName').value = car.name;
     document.getElementById('carCategory').value = car.category;
     document.getElementById('carPrice').value = car.price;
-    document.getElementById('carImage').value = car.image;
     document.getElementById('carSeats').value = car.seats;
     document.getElementById('carTransmission').value = car.transmission;
     document.getElementById('carDescription').value = car.description || '';
+
+    const imagePreview = document.getElementById('carImagePreview');
+    if (car.image) {
+        imagePreview.innerHTML = `<img src="${car.image}" alt="Preview" style="max-width:200px;max-height:150px;border-radius:6px;object-fit:cover;">`;
+        imagePreview.style.display = 'block';
+    } else {
+        imagePreview.style.display = 'none';
+    }
+    document.getElementById('carImage').value = '';
 
     document.getElementById('carFormCancel').style.display = 'inline-flex';
     document.querySelector('.admin-tab[data-tab="add-car"]').click();

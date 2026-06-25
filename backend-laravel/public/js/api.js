@@ -45,6 +45,35 @@ async function apiPut(endpoint, body) {
     return await res.json();
 }
 
+async function apiPostMultipart(endpoint, formData) {
+    const headers = {};
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    const res = await fetch(`${API_BASE}/api${endpoint}`, {
+        method: 'POST', headers, body: formData,
+    });
+    if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if (json.errors) showFieldErrors(json.errors);
+        throw new Error(json.message || `HTTP ${res.status}`);
+    }
+    return await res.json();
+}
+
+async function apiPutMultipart(endpoint, formData) {
+    const headers = {};
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    formData.append('_method', 'PUT');
+    const res = await fetch(`${API_BASE}/api${endpoint}`, {
+        method: 'POST', headers, body: formData,
+    });
+    if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if (json.errors) showFieldErrors(json.errors);
+        throw new Error(json.message || `HTTP ${res.status}`);
+    }
+    return await res.json();
+}
+
 async function apiDelete(endpoint) {
     const res = await fetch(`${API_BASE}/api${endpoint}`, {
         method: 'DELETE', headers: apiHeaders(),
