@@ -235,7 +235,10 @@
 
             <div class="admin-panel" id="adminPanel" style="display:none;">
                 <div class="admin-tabs">
-                    <button class="admin-tab active" data-tab="bookings">
+                    <button class="admin-tab active" data-tab="dashboard">
+                        <i class="fas fa-chart-bar"></i> Dashboard
+                    </button>
+                    <button class="admin-tab" data-tab="bookings">
                         <i class="fas fa-calendar-check"></i> Booking
                     </button>
                     <button class="admin-tab" data-tab="cars-manage">
@@ -253,7 +256,25 @@
                 </div>
 
                 <div class="admin-content">
-                    <div class="admin-tab-content active" id="tab-bookings">
+                    <div class="admin-tab-content active" id="tab-dashboard">
+                        <h3>Dashboard</h3>
+                        <div class="stats-grid" id="statsGrid"></div>
+                        <div class="stats-charts">
+                            <div class="stats-card">
+                                <h4>Booking per Status</h4>
+                                <div id="statsStatusChart"></div>
+                            </div>
+                            <div class="stats-card">
+                                <h4>Pendapatan Bulanan</h4>
+                                <div id="statsRevenueChart"></div>
+                            </div>
+                        </div>
+                        <div class="stats-card" style="margin-top:24px;">
+                            <h4>Booking Terbaru</h4>
+                            <div id="statsRecentBookings"></div>
+                        </div>
+                    </div>
+                    <div class="admin-tab-content" id="tab-bookings">
                         <h3>Daftar Booking</h3>
                         <div class="table-wrapper">
                             <table class="admin-table">

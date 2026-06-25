@@ -190,6 +190,109 @@ async function toggleCarAvailable(id, available) {
     showToast(available ? 'Mobil tersedia' : 'Mobil tidak tersedia', 'success');
 }
 
+function renderDashboard() {
+    const grid = document.getElementById('statsGrid');
+    const statusChart = document.getElementById('statsStatusChart');
+    const revenueChart = document.getElementById('statsRevenueChart');
+    const recentEl = document.getElementById('statsRecentBookings');
+    if (!grid) return;
+
+    if (USE_API && apiToken) {
+        apiGetRaw('/stats').then(statsRes => {
+            const stats = statsRes.data || statsRes;
+            renderStatsCards(grid, stats);
+            renderStatusChart(statusChart, stats.bookings_by_status || {});
+            renderRevenueChart(revenueChart, stats.monthly_revenue || []);
+            renderRecentBookings(recentEl, stats.recent_bookings || []);
+        }).catch(() => {
+            grid.innerHTML = '<div class="no-data">Gagal memuat statistik.</div>';
+        });
+    } else {
+        const totalCars = cars.length;
+        const totalBookings = bookings.length;
+        const totalRevenue = bookings
+            .filter(b => b.status === 'confirmed' || b.status === 'completed')
+            .reduce((sum, b) => sum + (b.totalPrice || b.total_price || 0), 0);
+        const byStatus = {};
+        bookings.forEach(b => { byStatus[b.status] = (byStatus[b.status] || 0) + 1; });
+        const recent = [...bookings].reverse().slice(0, 5);
+
+        renderStatsCards(grid, { total_cars: totalCars, total_bookings: totalBookings, total_revenue: totalRevenue });
+        renderStatusChart(statusChart, byStatus);
+        renderRevenueChart(revenueChart, []);
+        renderRecentBookings(recentEl, recent.map(b => ({
+            id: b.id, customer_name: b.customerName || b.customer_name,
+            car_name: b.carName || '-', total_price: b.totalPrice || b.total_price || 0,
+            status: b.status, created_at: b.createdAt || b.created_at || '',
+        })));
+    }
+}
+
+function renderStatsCards(grid, stats) {
+    grid.innerHTML = `
+        <div class="stats-card"><div class="stat-icon" style="background:var(--primary-light);color:var(--primary);"><i class="fas fa-car"></i></div><div class="stat-value">${stats.total_cars || 0}</div><div class="stat-label">Total Mobil</div></div>
+        <div class="stats-card"><div class="stat-icon" style="background:#dcfce7;color:#15803d;"><i class="fas fa-calendar-check"></i></div><div class="stat-value">${stats.total_bookings || 0}</div><div class="stat-label">Total Booking</div></div>
+        <div class="stats-card"><div class="stat-icon" style="background:#dbeafe;color:#1d4ed8;"><i class="fas fa-money-bill-wave"></i></div><div class="stat-value">${formatPrice(stats.total_revenue || 0)}</div><div class="stat-label">Total Pendapatan</div></div>
+    `;
+}
+
+function renderStatusChart(el, byStatus) {
+    const statuses = { pending: 'Pending', confirmed: 'Confirmed', completed: 'Completed', cancelled: 'Cancelled' };
+    const colors = { pending: '#f59e0b', confirmed: '#10b981', completed: '#3b82f6', cancelled: '#ef4444' };
+    const total = Object.values(byStatus).reduce((a, b) => a + b, 0);
+    if (!total) { el.innerHTML = '<div class="no-data" style="padding:30px 0;">Belum ada data.</div>'; return; }
+
+    let html = '';
+    for (const [key, label] of Object.entries(statuses)) {
+        const count = byStatus[key] || 0;
+        const pct = (count / total) * 100;
+        html += `
+            <div class="chart-bar-row">
+                <span class="chart-label">${label}</span>
+                <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${colors[key]};"></div></div>
+                <span class="chart-value">${count}</span>
+            </div>
+        `;
+    }
+    el.innerHTML = html;
+}
+
+function renderRevenueChart(el, monthly) {
+    if (!monthly || !monthly.length) {
+        el.innerHTML = '<div class="no-data" style="padding:30px 0;">Data pendapatan bulanan belum tersedia.</div>';
+        return;
+    }
+    const maxRev = Math.max(...monthly.map(m => m.revenue), 1);
+    let html = '';
+    monthly.forEach(m => {
+        const pct = (m.revenue / maxRev) * 100;
+        html += `
+            <div class="chart-bar-row">
+                <span class="chart-label">${m.month}</span>
+                <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:var(--primary);"></div></div>
+                <span class="chart-value">${formatPrice(m.revenue)}</span>
+            </div>
+        `;
+    });
+    el.innerHTML = html;
+}
+
+function renderRecentBookings(el, recent) {
+    if (!recent.length) { el.innerHTML = '<div class="no-data" style="padding:20px 0;">Belum ada booking.</div>'; return; }
+    el.innerHTML = '<div class="table-wrapper"><table class="admin-table"><thead><tr><th>ID</th><th>Penyewa</th><th>Mobil</th><th>Total</th><th>Status</th><th>Tanggal</th></tr></thead><tbody>' +
+        recent.map(b => `
+            <tr>
+                <td>#${b.id}</td>
+                <td>${b.customer_name}</td>
+                <td>${b.car_name}</td>
+                <td>${formatPrice(b.total_price)}</td>
+                <td><span class="status-badge ${b.status}">${b.status}</span></td>
+                <td>${b.created_at}</td>
+            </tr>
+        `).join('') +
+    '</tbody></table></div>';
+}
+
 function initCarForm() {
     const form = document.getElementById('carForm');
     const cancelBtn = document.getElementById('carFormCancel');

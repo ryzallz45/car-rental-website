@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderAdminCars();
     renderBookingEditCarSelect();
     initBookingEdit();
+    renderDashboard();
 
     if (!USE_API) {
         document.getElementById('filterCategory').addEventListener('change', () => { carsPagination.currentPage = 1; renderCars(); });
