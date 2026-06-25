@@ -144,9 +144,10 @@ function renderAdminCars() {
             <td>${c.transmission}</td>
             <td>${c.seats}</td>
             <td>
-                <span class="status-badge ${c.available ? 'confirmed' : 'cancelled'}">
-                    ${c.available ? 'Tersedia' : 'Tidak'}
-                </span>
+                <label class="toggle-switch" title="${c.available ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}">
+                    <input type="checkbox" ${c.available ? 'checked' : ''} onchange="toggleCarAvailable(${c.id}, this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
             </td>
             <td>
                 <div class="action-btns">
@@ -160,6 +161,33 @@ function renderAdminCars() {
             </td>
         </tr>
     `).join('');
+}
+
+async function toggleCarAvailable(id, available) {
+    if (USE_API) {
+        try {
+            await apiPut(`/cars/${id}`, { available });
+            const pRes = await apiGetRaw(`/cars?per_page=${carsPagination.perPage}&page=${carsPagination.currentPage}`).catch(() => ({}));
+            if (pRes.data) {
+                cars = pRes.data;
+                carsPagination.currentPage = pRes.current_page || 1;
+                carsPagination.lastPage = pRes.last_page || 1;
+                carsPagination.total = pRes.total || 0;
+            }
+        } catch (err) {
+            showToast(err.message, 'error', 'Gagal Update');
+            renderAdminCars();
+            return;
+        }
+    } else {
+        const car = cars.find(c => c.id === id);
+        if (car) car.available = available;
+        saveCars();
+    }
+    renderCars();
+    renderAdminCars();
+    populateBookingCarSelect();
+    showToast(available ? 'Mobil tersedia' : 'Mobil tidak tersedia', 'success');
 }
 
 function initCarForm() {
